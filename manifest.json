@@ -1,6 +1,6 @@
 {
-  "name": "Hello Sync",
-  "short_name": "HelloSync",
+  "name": "Novel Writing",
+  "short_name": "Novel",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
