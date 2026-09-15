@@ -1,36 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Novel Writing</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<style>
-  :root { color-scheme: dark light; }
-  body {
-    font-family: -apple-system, system-ui, sans-serif;
-    background: #0f172a; color: #e2e8f0;
-    margin: 0; padding: 24px; min-height: 100vh; box-sizing: border-box;
-    display: flex; align-items: center; justify-content: center; text-align: center;
-  }
-  h1 { font-size: 2rem; margin: 0 0 12px; }
-  p { font-size: 1.05rem; color: #94a3b8; margin: 0; }
-</style>
-</head>
-<body>
-  <main>
-    <h1>Welcome</h1>
-    <p>Your novel-writing companion.</p>
-  </main>
-
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <title>Novel Writing</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

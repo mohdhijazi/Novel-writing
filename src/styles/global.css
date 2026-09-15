@@ -1,0 +1,29 @@
+/* Design tokens: use these variables instead of hard-coded values. */
+:root {
+  color-scheme: dark;
+
+  --color-bg: #0f172a;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+
+  --font-sans: -apple-system, system-ui, sans-serif;
+  --font-size-lg: 1.05rem;
+  --font-size-2xl: 2rem;
+
+  --space-3: 12px;
+  --space-6: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-text-size-adjust: 100%;
+}
