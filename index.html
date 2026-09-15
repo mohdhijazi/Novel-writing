@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hello Sync</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root { color-scheme: dark light; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: #0f172a; color: #e2e8f0;
+    margin: 0; padding: 24px; min-height: 100vh; box-sizing: border-box;
+  }
+  h1#display-title { font-size: 1.6rem; word-break: break-word; min-height: 2.2em; }
+  textarea {
+    width: 100%; box-sizing: border-box; font-size: 1rem; padding: 10px;
+    border-radius: 8px; border: 1px solid #334155; background: #1e293b;
+    color: #e2e8f0; min-height: 80px; font-family: inherit;
+  }
+  button {
+    padding: 10px 16px; border-radius: 8px; border: none; font-size: 1rem;
+    cursor: pointer; margin-top: 10px; margin-right: 8px;
+  }
+  #save-btn { background: #6366f1; color: white; }
+  #connect-btn { background: #334155; color: #e2e8f0; }
+  #status { margin-top: 16px; font-size: 0.85rem; color: #94a3b8; white-space: pre-line; }
+</style>
+</head>
+<body>
+  <h1 id="display-title">(nothing saved yet)</h1>
+  <textarea id="text-input" placeholder="Type something..."></textarea><br>
+  <button id="save-btn">Save</button>
+  <button id="connect-btn">Connect Google Drive</button>
+  <div id="status"></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+// ===== EDIT THIS before deploying =====
+const CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+// ========================================
+
+const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const FILE_NAME = 'hello-sync-data.json';
+const DB_NAME = 'hello-sync-db';
+const STORE = 'kv';
+
+let tokenClient, accessToken = null, driveFileId = null;
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+// ---- IndexedDB helpers ----
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, value) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ---- Display ----
+function render(text) {
+  document.title = text ? text.slice(0, 60) : 'Hello Sync';
+  document.getElementById('display-title').textContent = text || '(nothing saved yet)';
+}
+
+// ---- Local save/load ----
+async function loadLocal() {
+  const record = await idbGet('note');
+  if (record) {
+    document.getElementById('text-input').value = record.text;
+    render(record.text);
+  }
+  return record;
+}
+async function saveLocal(text) {
+  const record = { text, updatedAt: Date.now() };
+  await idbSet('note', record);
+  render(text);
+  return record;
+}
+
+// ---- Google auth ----
+function initGoogle() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPE,
+    callback: (resp) => {
+      if (resp.access_token) {
+        accessToken = resp.access_token;
+        localStorage.setItem('hs_token', accessToken);
+        localStorage.setItem('hs_token_exp', String(Date.now() + 3500 * 1000));
+        setStatus('Connected to Google Drive.');
+        syncFromDrive();
+      }
+    }
+  });
+  const savedExp = Number(localStorage.getItem('hs_token_exp') || 0);
+  if (savedExp > Date.now()) {
+    accessToken = localStorage.getItem('hs_token');
+    setStatus('Reusing saved connection...');
+    syncFromDrive();
+  }
+}
+
+document.getElementById('connect-btn').addEventListener('click', () => {
+  if (!tokenClient) { setStatus('Google sign-in still loading, try again in a second.'); return; }
+  tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+});
+
+// ---- Drive operations (drive.file scope: app can only see files it created) ----
+async function driveFindFile() {
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=name%3D'${FILE_NAME}'+and+trashed%3Dfalse&spaces=drive&fields=files(id,modifiedTime)`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) throw new Error('Drive list failed: ' + res.status);
+  const data = await res.json();
+  return data.files && data.files[0] ? data.files[0] : null;
+}
+
+async function driveDownload(fileId) {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!res.ok) throw new Error('Drive download failed: ' + res.status);
+  return res.json();
+}
+
+async function driveUpload(record, existingFileId) {
+  const boundary = 'hs_boundary';
+  const metadata = { name: FILE_NAME, mimeType: 'application/json' };
+  const body =
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+    `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(record)}\r\n--${boundary}--`;
+  const url = existingFileId
+    ? `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart`
+    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+  const res = await fetch(url, {
+    method: existingFileId ? 'PATCH' : 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body
+  });
+  if (!res.ok) throw new Error('Drive upload failed: ' + res.status);
+  return res.json();
+}
+
+async function syncFromDrive() {
+  if (!accessToken || !navigator.onLine) return;
+  try {
+    setStatus('Checking Google Drive...');
+    const found = await driveFindFile();
+    const local = await idbGet('note');
+    if (found) {
+      driveFileId = found.id;
+      const remote = await driveDownload(found.id);
+      if (!local || (remote.updatedAt || 0) > (local.updatedAt || 0)) {
+        await idbSet('note', remote);
+        document.getElementById('text-input').value = remote.text;
+        render(remote.text);
+        setStatus('Loaded newer version from Google Drive.');
+        return;
+      }
+    }
+    setStatus('Up to date with Google Drive.');
+  } catch (e) {
+    setStatus('Drive sync error: ' + e.message);
+  }
+}
+
+async function pushToDrive(record) {
+  if (!accessToken) { setStatus('Saved locally. Connect Google Drive to sync.'); return; }
+  if (!navigator.onLine) { setStatus('Saved locally. Offline — will sync when back online.'); return; }
+  try {
+    if (!driveFileId) {
+      const found = await driveFindFile();
+      if (found) driveFileId = found.id;
+    }
+    const result = await driveUpload(record, driveFileId);
+    driveFileId = result.id;
+    setStatus('Saved locally and synced to Google Drive at ' + new Date(record.updatedAt).toLocaleTimeString());
+  } catch (e) {
+    setStatus('Saved locally. Drive sync failed: ' + e.message);
+  }
+}
+
+document.getElementById('save-btn').addEventListener('click', async () => {
+  const text = document.getElementById('text-input').value;
+  const record = await saveLocal(text);
+  pushToDrive(record);
+});
+
+window.addEventListener('online', () => { if (accessToken) syncFromDrive(); });
+
+// ---- Boot ----
+loadLocal();
+window.addEventListener('load', () => {
+  if (window.google && google.accounts) initGoogle();
+  else setTimeout(() => { if (window.google) initGoogle(); }, 500);
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
