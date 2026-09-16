@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 
+import { NameForm } from '@/components/NameForm';
 import { DriveStatus } from '@/features/drive/DriveStatus';
 import { useDrive } from '@/features/drive/driveContext';
 
-import { NewWorldForm } from './NewWorldForm';
 import { WorldList } from './WorldList';
 import styles from './WorldsPage.module.css';
 import { useWorldSync } from './useWorldSync';
@@ -29,7 +29,12 @@ export function WorldsPage() {
         <DriveStatus />
       </header>
 
-      <NewWorldForm onCreate={handleCreate} />
+      <NameForm
+        label="World name"
+        placeholder="Aetheria"
+        submitLabel="Create world"
+        onSubmit={handleCreate}
+      />
 
       {isSyncing && <p className={styles.note}>Syncing with Google Drive…</p>}
       {error !== null && <p className={styles.error}>{error}</p>}

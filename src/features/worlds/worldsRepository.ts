@@ -9,6 +9,11 @@ export async function listWorlds(): Promise<World[]> {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export async function getWorld(id: string): Promise<World | null> {
+  const world = await db.worlds.get(id);
+  return world?.deletedAt === null ? world : null;
+}
+
 export async function createWorld(name: string): Promise<World> {
   const timestamp = new Date().toISOString();
   const world: World = {

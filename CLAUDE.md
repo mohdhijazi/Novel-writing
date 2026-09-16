@@ -24,10 +24,11 @@ My Drive/
   Worlds/                     root folder, created by the app
     <World name>/             one folder per world
       world.json              { schemaVersion, id, name, createdAt, updatedAt, deletedAt }
-      characters.json         one file per collection, all records of that kind
+      novels.json             one file per collection, all records of that kind
+      characters.json
       locations.json
       events.json
-      chapters.json
+      ideas.json
       links.json
 ```
 
@@ -40,8 +41,10 @@ My Drive/
 - Worlds are discovered on other devices by listing subfolders of the root folder and reading each
   `world.json`.
 - Syncing merges record by record (newest `updatedAt` wins) and uploads only what changed.
-- `chapters.json` sits at world level for now; once a world can hold several novels/books, chapters
-  will most likely move under a book — ask before changing that layout.
+- Collections mirror the tabs of a world. Chapters belong inside a novel, so they are not a
+  world-level collection — ask before changing that layout.
+- Collection files are created when a world's folder is created. A world created by an older
+  version keeps the files it had; there is no migration step yet.
 - Drive keeps 30 days of file revisions — that is the recovery path for a bad overwrite.
 
 ## Commands
@@ -71,6 +74,8 @@ The user wants the code **super organized and very clean, always**.
 - **Styling:** CSS Modules (`Component.module.css`) next to the component. Use the tokens in
   `global.css` — add a token rather than hard-coding a color, size, or spacing value.
 - **Imports:** use the `@/` alias for anything outside the current feature folder.
+- **Routing:** React Router with `HashRouter` (`#/worlds/<id>/<tab>`). Hash URLs avoid GitHub Pages
+  404s on refreshed deep links and keep the back button/iPad back-swipe working.
 - **No dead code:** no placeholders, unused exports, commented-out code, or speculative
   abstractions. Add a library when a feature needs it (e.g. Dexie with the first stored data).
 - Comments explain _why_, not _what_.
