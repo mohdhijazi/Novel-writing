@@ -1,7 +1,7 @@
-# Novel Writing
+# Worlds
 
-An offline-first planner for a novel's world — characters, locations, events, chapters, and
-timeline — that syncs between devices through Google Drive.
+An offline-first world-building app — characters, locations, events, timeline, and the links
+between them — that syncs between devices through Google Drive. Novels set in a world come later.
 
 Live at https://mohdhijazi.github.io/Novel-writing/
 

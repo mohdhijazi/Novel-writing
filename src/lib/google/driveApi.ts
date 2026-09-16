@@ -4,7 +4,7 @@ const FILES_URL = 'https://www.googleapis.com/drive/v3/files';
 const UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
 const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 const JSON_MIME_TYPE = 'application/json';
-const MULTIPART_BOUNDARY = 'novel-writing-boundary';
+const MULTIPART_BOUNDARY = 'worlds-boundary';
 
 export interface DriveFile {
   id: string;

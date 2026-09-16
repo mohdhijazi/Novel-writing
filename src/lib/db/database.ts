@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 
-import type { Novel } from '@/features/novels/types';
+import type { World } from '@/features/worlds/types';
 
 /**
  * The local database — the source of truth on each device; Drive is a copy.
@@ -9,15 +9,15 @@ import type { Novel } from '@/features/novels/types';
  * Dexie needs all tables declared in one versioned schema. Reads and writes
  * belong in each feature's repository, not here.
  */
-class NovelWritingDatabase extends Dexie {
-  novels!: EntityTable<Novel, 'id'>;
+class WorldBuildingDatabase extends Dexie {
+  worlds!: EntityTable<World, 'id'>;
 
   constructor() {
-    super('novel-writing');
+    super('world-building');
     this.version(1).stores({
-      novels: 'id, title, updatedAt',
+      worlds: 'id, name, updatedAt',
     });
   }
 }
 
-export const db = new NovelWritingDatabase();
+export const db = new WorldBuildingDatabase();

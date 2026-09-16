@@ -1,38 +1,38 @@
 import { useState, type SyntheticEvent } from 'react';
 
-import styles from './NewNovelForm.module.css';
+import styles from './NewWorldForm.module.css';
 
-export function NewNovelForm({ onCreate }: { onCreate: (title: string) => void }) {
-  const [title, setTitle] = useState('');
+export function NewWorldForm({ onCreate }: { onCreate: (name: string) => void }) {
+  const [name, setName] = useState('');
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
     event.preventDefault();
-    const trimmed = title.trim();
+    const trimmed = name.trim();
     if (!trimmed) {
       return;
     }
     onCreate(trimmed);
-    setTitle('');
+    setName('');
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <label className={styles.label} htmlFor="novel-title">
-        Novel title
+      <label className={styles.label} htmlFor="world-name">
+        World name
       </label>
       <div className={styles.row}>
         <input
-          id="novel-title"
+          id="world-name"
           className={styles.input}
-          value={title}
+          value={name}
           onChange={(event) => {
-            setTitle(event.target.value);
+            setName(event.target.value);
           }}
           placeholder="The Glass Road"
           autoComplete="off"
         />
-        <button type="submit" className={styles.button} disabled={title.trim() === ''}>
-          Create novel
+        <button type="submit" className={styles.button} disabled={name.trim() === ''}>
+          Create world
         </button>
       </div>
     </form>

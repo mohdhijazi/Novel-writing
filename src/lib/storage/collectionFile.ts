@@ -1,5 +1,5 @@
 /**
- * Shape of the JSON files stored in a novel's Drive folder. One file holds all
+ * Shape of the JSON files stored in a world's Drive folder. One file holds all
  * records of one kind; syncing merges record by record using `updatedAt`.
  */
 export const SCHEMA_VERSION = 1;

@@ -1,10 +1,10 @@
 import { DriveProvider } from '@/features/drive/DriveProvider';
-import { NovelsPage } from '@/features/novels/NovelsPage';
+import { WorldsPage } from '@/features/worlds/WorldsPage';
 
 export function App() {
   return (
     <DriveProvider>
-      <NovelsPage />
+      <WorldsPage />
     </DriveProvider>
   );
 }

@@ -1,7 +1,10 @@
-# Novel Writing
+# Worlds
 
-A planner for the user's novel: characters, locations, events, chapters, a calendar/timeline, and
-the links between them. Used on a Windows PC and an iPad.
+A world-building app: characters, locations, events, a calendar/timeline, and the links between
+them. A novel (or several) is one part of a world — books and their chapters come later. Used on a
+Windows PC and an iPad.
+
+The repo and URL keep the name "Novel-writing"; the app is called "Worlds".
 
 ## Architecture (decided — don't relitigate unless asked)
 
@@ -18,9 +21,9 @@ the links between them. Used on a Windows PC and an iPad.
 
 ```
 My Drive/
-  Novel Writing/              root folder, created by the app
-    <Novel title>/            one folder per novel
-      novel.json              { schemaVersion, id, title, createdAt, updatedAt, deletedAt }
+  Worlds/                     root folder, created by the app
+    <World name>/             one folder per world
+      world.json              { schemaVersion, id, name, createdAt, updatedAt, deletedAt }
       characters.json         one file per collection, all records of that kind
       locations.json
       events.json
@@ -34,9 +37,11 @@ My Drive/
 - `drive.file` scope means the app only sees what it created — the app must create the root folder;
   a folder the user made by hand is invisible to it. Folders are tracked by Drive **ID**, not name,
   so the user can rename or move them.
-- Novels are discovered on other devices by listing subfolders of the root folder and reading each
-  `novel.json`.
+- Worlds are discovered on other devices by listing subfolders of the root folder and reading each
+  `world.json`.
 - Syncing merges record by record (newest `updatedAt` wins) and uploads only what changed.
+- `chapters.json` sits at world level for now; once a world can hold several novels/books, chapters
+  will most likely move under a book — ask before changing that layout.
 - Drive keeps 30 days of file revisions — that is the recovery path for a bad overwrite.
 
 ## Commands

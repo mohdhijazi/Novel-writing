@@ -17,8 +17,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Novel Writing',
-        short_name: 'Novel',
+        name: 'Worlds',
+        short_name: 'Worlds',
         display: 'standalone',
         background_color: '#0f172a',
         theme_color: '#0f172a',

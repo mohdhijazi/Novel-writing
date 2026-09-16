@@ -15,7 +15,7 @@ export function DriveStatus() {
         </>
       ) : (
         <>
-          <span className={styles.label}>Not connected — novels stay on this device</span>
+          <span className={styles.label}>Not connected — worlds stay on this device</span>
           <button type="button" className={styles.button} onClick={connect} disabled={isConnecting}>
             {isConnecting ? 'Connecting…' : 'Connect Google Drive'}
           </button>

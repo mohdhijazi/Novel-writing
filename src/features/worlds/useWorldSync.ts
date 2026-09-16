@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState, useTransition } from 'react';
 
-import { syncNovels } from './syncNovels';
+import { syncWorlds } from './syncWorlds';
 
-export interface NovelSync {
+export interface WorldSync {
   isSyncing: boolean;
   error: string | null;
   sync: () => void;
 }
 
 /**
- * Keeps the novel list in step with Drive: on connect, when the device comes
- * back online, and whenever a caller asks (after creating a novel).
+ * Keeps the world list in step with Drive: on connect, when the device comes
+ * back online, and whenever a caller asks (after creating a world).
  */
-export function useNovelSync(isConnected: boolean): NovelSync {
+export function useWorldSync(isConnected: boolean): WorldSync {
   const [isSyncing, startSync] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +22,7 @@ export function useNovelSync(isConnected: boolean): NovelSync {
     }
     startSync(async () => {
       try {
-        await syncNovels();
+        await syncWorlds();
         setError(null);
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : 'Sync with Google Drive failed.');
