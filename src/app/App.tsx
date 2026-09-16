@@ -1,5 +1,10 @@
-import { WelcomePage } from '@/features/welcome/WelcomePage';
+import { DriveProvider } from '@/features/drive/DriveProvider';
+import { NovelsPage } from '@/features/novels/NovelsPage';
 
 export function App() {
-  return <WelcomePage />;
+  return (
+    <DriveProvider>
+      <NovelsPage />
+    </DriveProvider>
+  );
 }

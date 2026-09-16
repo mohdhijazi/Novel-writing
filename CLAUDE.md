@@ -14,6 +14,31 @@ the links between them. Used on a Windows PC and an iPad.
 - **Conflicts:** last-write-wins per record by `updatedAt`. Single user, two devices — keep it simple.
 - Deletes must be soft (`deletedAt`), otherwise sync resurrects deleted records.
 
+## Storage model (agreed — don't change without asking)
+
+```
+My Drive/
+  Novel Writing/              root folder, created by the app
+    <Novel title>/            one folder per novel
+      novel.json              { schemaVersion, id, title, createdAt, updatedAt, deletedAt }
+      characters.json         one file per collection, all records of that kind
+      locations.json
+      events.json
+      chapters.json
+      links.json
+```
+
+- Collection file: `{ schemaVersion, collection, updatedAt, records: [...] }`.
+- Every record: UUID `id` (made on the device), ISO-8601 UTC `updatedAt`, `deletedAt` for soft
+  deletes. Tombstones are purged after 90 days.
+- `drive.file` scope means the app only sees what it created — the app must create the root folder;
+  a folder the user made by hand is invisible to it. Folders are tracked by Drive **ID**, not name,
+  so the user can rename or move them.
+- Novels are discovered on other devices by listing subfolders of the root folder and reading each
+  `novel.json`.
+- Syncing merges record by record (newest `updatedAt` wins) and uploads only what changed.
+- Drive keeps 30 days of file revisions — that is the recovery path for a bad overwrite.
+
 ## Commands
 
 - `npm run dev` — dev server at http://localhost:5173/Novel-writing/ (service worker disabled)
