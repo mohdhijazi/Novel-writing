@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
+import { AutosaveField } from '@/components/AutosaveField';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
-import { CharacterField } from './CharacterField';
 import styles from './CharacterCard.module.css';
 import { CHARACTER_FIELD_GROUPS } from './characterFields';
-import { deleteCharacter } from './charactersRepository';
+import { deleteCharacter, saveCharacterField } from './charactersRepository';
 import { characterFullName, type Character } from './types';
 
 export function CharacterCard({ character }: { character: Character }) {
@@ -36,11 +36,16 @@ export function CharacterCard({ character }: { character: Character }) {
               <h3 className={styles.groupTitle}>{group.title}</h3>
               <div className={styles.fields}>
                 {group.fields.map((definition) => (
-                  <CharacterField
+                  <AutosaveField
                     key={definition.key}
-                    characterId={character.id}
-                    definition={definition}
+                    label={definition.label}
                     value={character[definition.key]}
+                    multiline={definition.multiline}
+                    onSave={(value) => {
+                      void saveCharacterField(character.id, definition.key, value).then(() => {
+                        requestSync(EDIT_SYNC_DELAY_MS);
+                      });
+                    }}
                   />
                 ))}
               </div>

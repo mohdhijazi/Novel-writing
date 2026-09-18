@@ -1,21 +1,26 @@
 import { useEffect, useId, useState } from 'react';
 
-import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
+import styles from './AutosaveField.module.css';
 
-import styles from './CharacterField.module.css';
-import type { CharacterFieldDefinition } from './characterFields';
-import { saveCharacterField } from './charactersRepository';
-
-/** Milliseconds of no typing before the field is written to the database. */
+/** Milliseconds of no typing before the value is saved. */
 const SAVE_DELAY_MS = 500;
 
-interface CharacterFieldProps {
-  characterId: string;
-  definition: CharacterFieldDefinition;
+interface AutosaveFieldProps {
+  label: string;
   value: string;
+  onSave: (value: string) => void;
+  multiline?: boolean;
+  autoFocus?: boolean;
 }
 
-export function CharacterField({ characterId, definition, value }: CharacterFieldProps) {
+/** A labelled field that saves itself shortly after typing stops. */
+export function AutosaveField({
+  label,
+  value,
+  onSave,
+  multiline = false,
+  autoFocus = false,
+}: AutosaveFieldProps) {
   const inputId = useId();
   const [draft, setDraft] = useState(value);
 
@@ -24,26 +29,25 @@ export function CharacterField({ characterId, definition, value }: CharacterFiel
       return;
     }
     const timer = setTimeout(() => {
-      void saveCharacterField(characterId, definition.key, draft).then(() => {
-        requestSync(EDIT_SYNC_DELAY_MS);
-      });
+      onSave(draft);
     }, SAVE_DELAY_MS);
     return () => {
       clearTimeout(timer);
     };
-  }, [draft, value, characterId, definition.key]);
+  }, [draft, value, onSave]);
 
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor={inputId}>
-        {definition.label}
+        {label}
       </label>
-      {definition.multiline === true ? (
+      {multiline ? (
         <textarea
           id={inputId}
           className={styles.textarea}
           value={draft}
           rows={2}
+          autoFocus={autoFocus}
           onChange={(event) => {
             setDraft(event.target.value);
           }}
@@ -54,6 +58,7 @@ export function CharacterField({ characterId, definition, value }: CharacterFiel
           className={styles.input}
           value={draft}
           autoComplete="off"
+          autoFocus={autoFocus}
           onChange={(event) => {
             setDraft(event.target.value);
           }}

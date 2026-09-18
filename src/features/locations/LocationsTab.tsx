@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { requestSync } from '@/features/sync/syncScheduler';
 
+import { LocationDetails } from './LocationDetails';
 import { LocationSquare } from './LocationSquare';
 import styles from './LocationsTab.module.css';
 import { createLocation, listLocations } from './locationsRepository';
@@ -12,19 +13,21 @@ import { MAP_HEIGHT, MAP_WIDTH, positionForNewLocation } from './mapLayout';
 export function LocationsTab() {
   const { worldId } = useParams();
   const mapRef = useRef<HTMLDivElement>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const locations = useLiveQuery(
     async () => (worldId === undefined ? [] : await listLocations(worldId)),
     [worldId],
   );
+
+  const selected = locations?.find((location) => location.id === selectedId) ?? null;
 
   function handleAdd() {
     if (worldId === undefined) {
       return;
     }
     const { x, y } = positionForNewLocation(locations?.length ?? 0);
-    void createLocation(worldId, '', x, y).then((location) => {
-      setEditingId(location.id);
+    void createLocation(worldId, x, y).then((location) => {
+      setSelectedId(location.id);
       requestSync();
     });
   }
@@ -35,7 +38,7 @@ export function LocationsTab() {
         <button type="button" className={styles.add} onClick={handleAdd} aria-label="Add location">
           +
         </button>
-        <p className={styles.hint}>Drag a square to move it. Tap it to rename.</p>
+        <p className={styles.hint}>Drag a square to move it. Click it to edit the details.</p>
       </div>
 
       <div className={styles.viewport}>
@@ -50,14 +53,24 @@ export function LocationsTab() {
               key={location.id}
               location={location}
               mapRef={mapRef}
-              autoEdit={location.id === editingId}
-              onEditDone={() => {
-                setEditingId(null);
+              isSelected={location.id === selectedId}
+              onSelect={() => {
+                setSelectedId(location.id);
               }}
             />
           ))}
         </div>
       </div>
+
+      {selected && (
+        <LocationDetails
+          key={selected.id}
+          location={selected}
+          onClose={() => {
+            setSelectedId(null);
+          }}
+        />
+      )}
     </section>
   );
 }

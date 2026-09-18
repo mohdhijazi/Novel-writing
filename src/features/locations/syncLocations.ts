@@ -7,9 +7,11 @@ const locationSync: CollectionSync<Location, LocationDoc> = {
   collection: 'locations',
   listRecords: listLocationRecords,
   mergeRemote: mergeRemoteLocations,
-  toDoc: ({ id, name, x, y, createdAt, updatedAt, deletedAt }) => ({
+  toDoc: ({ id, name, type, area, x, y, createdAt, updatedAt, deletedAt }) => ({
     id,
     name,
+    type,
+    area,
     x,
     y,
     createdAt,

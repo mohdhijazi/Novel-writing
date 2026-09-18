@@ -1,6 +1,8 @@
 .square {
   position: absolute;
   display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   align-items: center;
   justify-content: center;
   padding: var(--space-3);
@@ -14,9 +16,13 @@
   user-select: none;
 }
 
-.square:hover,
-.square:focus-within {
+.square:hover {
   border-color: var(--color-accent);
+}
+
+.square[data-selected='true'] {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 .square:active {
@@ -30,41 +36,8 @@
   overflow-wrap: anywhere;
 }
 
-.input {
-  width: 100%;
-  padding: var(--space-1) var(--space-2);
-  font: inherit;
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  text-align: center;
-  background: var(--color-bg);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-md);
-}
-
-.input:focus {
-  outline: none;
-}
-
-.delete {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
-  line-height: 1;
+.type {
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  cursor: pointer;
-  background: none;
-  border: none;
-  opacity: 0;
-}
-
-.square:hover .delete,
-.delete:focus-visible {
-  opacity: 1;
-}
-
-.delete:hover {
-  color: var(--color-danger);
+  overflow-wrap: anywhere;
 }

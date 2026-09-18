@@ -1,13 +1,13 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
+import { useRef, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './LocationSquare.module.css';
-import { deleteLocation, moveLocation, renameLocation } from './locationsRepository';
+import { moveLocation } from './locationsRepository';
 import { SQUARE_SIZE, clampToMap } from './mapLayout';
 import type { Location } from './types';
 
-/** Movement under this many pixels counts as a tap, which opens the name for editing. */
+/** Movement under this many pixels counts as a tap, which opens the details. */
 const DRAG_THRESHOLD_PX = 4;
 
 interface DragState {
@@ -22,22 +22,17 @@ interface DragState {
 interface LocationSquareProps {
   location: Location;
   mapRef: RefObject<HTMLDivElement | null>;
-  autoEdit: boolean;
-  onEditDone: () => void;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
-export function LocationSquare({ location, mapRef, autoEdit, onEditDone }: LocationSquareProps) {
+export function LocationSquare({ location, mapRef, isSelected, onSelect }: LocationSquareProps) {
   const squareRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
-  // Tapping a square opens its name; `autoEdit` does the same for a square the
-  // toolbar just created, which can arrive after this component has mounted.
-  const [isTapped, setIsTapped] = useState(false);
-  const [draftName, setDraftName] = useState(location.name);
-  const isEditing = isTapped || autoEdit;
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     const square = squareRef.current;
-    if (isEditing || !square || event.button !== 0) {
+    if (!square || event.button !== 0) {
       return;
     }
     const bounds = square.getBoundingClientRect();
@@ -82,21 +77,10 @@ export function LocationSquare({ location, mapRef, autoEdit, onEditDone }: Locat
     }
     dragRef.current = null;
     if (!drag.moved) {
-      setIsTapped(true);
+      onSelect();
       return;
     }
     void moveLocation(location.id, drag.x, drag.y).then(() => {
-      requestSync(EDIT_SYNC_DELAY_MS);
-    });
-  }
-
-  function commitName() {
-    setIsTapped(false);
-    onEditDone();
-    if (draftName === location.name) {
-      return;
-    }
-    void renameLocation(location.id, draftName).then(() => {
       requestSync(EDIT_SYNC_DELAY_MS);
     });
   }
@@ -105,52 +89,15 @@ export function LocationSquare({ location, mapRef, autoEdit, onEditDone }: Locat
     <div
       ref={squareRef}
       className={styles.square}
+      data-selected={isSelected}
       style={{ left: location.x, top: location.y, width: SQUARE_SIZE, height: SQUARE_SIZE }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      {isEditing ? (
-        <input
-          className={styles.input}
-          value={draftName}
-          autoFocus
-          aria-label="Location name"
-          onChange={(event) => {
-            setDraftName(event.target.value);
-          }}
-          onBlur={commitName}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              commitName();
-            }
-            if (event.key === 'Escape') {
-              setDraftName(location.name);
-              setIsTapped(false);
-              onEditDone();
-            }
-          }}
-        />
-      ) : (
-        <span className={styles.name}>{location.name || 'Untitled'}</span>
-      )}
-
-      <button
-        type="button"
-        className={styles.delete}
-        aria-label={`Delete ${location.name || 'location'}`}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-        onClick={() => {
-          void deleteLocation(location.id).then(() => {
-            requestSync(EDIT_SYNC_DELAY_MS);
-          });
-        }}
-      >
-        ×
-      </button>
+      <span className={styles.name}>{location.name || 'Untitled'}</span>
+      {location.type !== '' && <span className={styles.type}>{location.type}</span>}
     </div>
   );
 }
