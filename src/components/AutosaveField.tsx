@@ -11,6 +11,10 @@ interface AutosaveFieldProps {
   onSave: (value: string) => void;
   multiline?: boolean;
   autoFocus?: boolean;
+  /** Keeps the label for screen readers but hides it, for compact rows. */
+  labelHidden?: boolean;
+  /** Shows a number keyboard on touch devices. */
+  numeric?: boolean;
 }
 
 /** A labelled field that saves itself shortly after typing stops. */
@@ -20,6 +24,8 @@ export function AutosaveField({
   onSave,
   multiline = false,
   autoFocus = false,
+  labelHidden = false,
+  numeric = false,
 }: AutosaveFieldProps) {
   const inputId = useId();
   const [draft, setDraft] = useState(value);
@@ -38,7 +44,7 @@ export function AutosaveField({
 
   return (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor={inputId}>
+      <label className={labelHidden ? styles.hiddenLabel : styles.label} htmlFor={inputId}>
         {label}
       </label>
       {multiline ? (
@@ -58,6 +64,7 @@ export function AutosaveField({
           className={styles.input}
           value={draft}
           autoComplete="off"
+          inputMode={numeric ? 'numeric' : undefined}
           autoFocus={autoFocus}
           onChange={(event) => {
             setDraft(event.target.value);

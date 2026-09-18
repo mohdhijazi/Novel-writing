@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 
+import type { WorldCalendar } from '@/features/calendar/types';
 import type { Character } from '@/features/characters/types';
 import type { Connection, Location } from '@/features/locations/types';
 import type { Chapter, Novel, Paragraph } from '@/features/novels/types';
@@ -20,6 +21,7 @@ class WorldBuildingDatabase extends Dexie {
   characters!: EntityTable<Character, 'id'>;
   locations!: EntityTable<Location, 'id'>;
   connections!: EntityTable<Connection, 'id'>;
+  calendars!: EntityTable<WorldCalendar, 'id'>;
 
   constructor() {
     super('world-building');
@@ -40,6 +42,9 @@ class WorldBuildingDatabase extends Dexie {
     });
     this.version(5).stores({
       connections: 'id, worldId, fromId, toId, updatedAt',
+    });
+    this.version(6).stores({
+      calendars: 'id, worldId, updatedAt',
     });
   }
 }

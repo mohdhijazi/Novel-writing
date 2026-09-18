@@ -11,6 +11,7 @@ export const COLLECTION_NAMES = [
   'characters',
   'locations',
   'connections',
+  'calendar',
   'events',
   'ideas',
   'links',

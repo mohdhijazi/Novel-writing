@@ -3,6 +3,7 @@ export const WORLD_TABS = [
   { slug: 'novels', label: 'Novels' },
   { slug: 'characters', label: 'Characters' },
   { slug: 'locations', label: 'Locations' },
+  { slug: 'calendar', label: 'Calendar' },
   { slug: 'events', label: 'Events' },
   { slug: 'ideas', label: 'Ideas' },
   { slug: 'links', label: 'Links' },
