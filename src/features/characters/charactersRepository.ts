@@ -1,4 +1,5 @@
 import { db } from '@/lib/db/database';
+import { mergeByUpdatedAt } from '@/lib/storage/mergeRecords';
 
 import { normalizeCharacter } from './types';
 import type { Character, CharacterDoc, CharacterTextField } from './types';
@@ -52,36 +53,15 @@ export async function deleteCharacter(id: string): Promise<void> {
   await db.characters.update(id, { deletedAt: timestamp, updatedAt: timestamp });
 }
 
-/**
- * Merges the characters from Drive into the local ones, newest `updatedAt`
- * winning per character. Returns true when the local side holds something the
- * Drive copy does not, meaning the merged file has to be uploaded.
- */
+/** Applies the characters from Drive; returns whether the local side holds more. */
 export async function mergeRemoteCharacters(
   worldId: string,
   docs: CharacterDoc[],
 ): Promise<boolean> {
   const local = await listCharacterRecords(worldId);
-  const localById = new Map(local.map((character) => [character.id, character]));
-  const toStore: Character[] = [];
-  let localIsAhead = false;
-
-  for (const doc of docs) {
-    const existing = localById.get(doc.id);
-    if (existing && existing.updatedAt >= doc.updatedAt) {
-      if (existing.updatedAt > doc.updatedAt) {
-        localIsAhead = true;
-      }
-      continue;
-    }
-    toStore.push(normalizeCharacter({ ...doc, worldId }));
-  }
-
-  const remoteIds = new Set(docs.map((doc) => doc.id));
-  if (local.some((character) => !remoteIds.has(character.id))) {
-    localIsAhead = true;
-  }
-
+  const { toStore, localIsAhead } = mergeByUpdatedAt(local, docs, (doc) =>
+    normalizeCharacter({ ...doc, worldId }),
+  );
   if (toStore.length > 0) {
     await db.characters.bulkPut(toStore);
   }

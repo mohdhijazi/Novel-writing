@@ -1,4 +1,5 @@
 import { syncCharactersForWorld } from '@/features/characters/syncCharacters';
+import { syncLocationsForWorld } from '@/features/locations/syncLocations';
 import { syncNovelsForWorld } from '@/features/novels/syncNovels';
 import { syncWorlds } from '@/features/worlds/syncWorlds';
 
@@ -6,6 +7,7 @@ import { syncWorlds } from '@/features/worlds/syncWorlds';
 export async function syncAll(): Promise<void> {
   for (const world of await syncWorlds()) {
     await syncCharactersForWorld(world.worldId, world.driveFolderId);
+    await syncLocationsForWorld(world.worldId, world.driveFolderId);
     await syncNovelsForWorld(world.worldId, world.driveFolderId);
   }
 }
