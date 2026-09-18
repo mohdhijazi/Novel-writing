@@ -1,12 +1,17 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
 
+import { useDrive } from '@/features/drive/driveContext';
+import { useSync } from '@/features/sync/useSync';
+
 import styles from './WorldPage.module.css';
 import { WORLD_TABS } from './worldTabs';
 import { getWorld } from './worldsRepository';
 
 export function WorldPage() {
   const { worldId } = useParams();
+  const { isConnected } = useDrive();
+  const { isSyncing, error } = useSync(isConnected);
   const world = useLiveQuery(
     async () => (worldId === undefined ? null : await getWorld(worldId)),
     [worldId],
@@ -44,6 +49,9 @@ export function WorldPage() {
           </NavLink>
         ))}
       </nav>
+
+      {isSyncing && <p className={styles.note}>Syncing with Google Drive…</p>}
+      {error !== null && <p className={styles.error}>{error}</p>}
 
       <Outlet />
     </main>

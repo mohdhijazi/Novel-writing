@@ -24,12 +24,17 @@ My Drive/
   Worlds/                     root folder, created by the app
     <World name>/             one folder per world
       world.json              { schemaVersion, id, name, createdAt, updatedAt, deletedAt }
-      novels.json             one file per collection, all records of that kind
-      characters.json
+      characters.json         one file per collection, all records of that kind
       locations.json
       events.json
       ideas.json
       links.json
+      Novels/
+        <Novel title>/
+          novel.json
+          <NN Chapter title>/
+            chapter.json
+            paragraphs.json   { schemaVersion, chapterId, updatedAt, paragraphs: [...] }
 ```
 
 - Collection file: `{ schemaVersion, collection, updatedAt, records: [...] }`.
@@ -41,8 +46,14 @@ My Drive/
 - Worlds are discovered on other devices by listing subfolders of the root folder and reading each
   `world.json`.
 - Syncing merges record by record (newest `updatedAt` wins) and uploads only what changed.
-- Collections mirror the tabs of a world. Chapters belong inside a novel, so they are not a
-  world-level collection — ask before changing that layout.
+- Collections mirror the tabs of a world. Novels are folders rather than a collection file,
+  because they hold chapter folders.
+- Paragraphs are one JSON file per chapter, not one file each: a file per paragraph would mean
+  renaming every later file whenever a paragraph is inserted mid-chapter.
+- Upload decisions use a per-chapter revision counter (`paragraphsRevision` vs
+  `paragraphsSyncedRevision`), never a timestamp comparison — a device whose clock runs ahead
+  would otherwise silently suppress the other device's edits, including deletes.
+- Downloads are skipped when Drive's `modifiedTime` matches the one stored at the last merge.
 - Collection files are created when a world's folder is created. A world created by an older
   version keeps the files it had; there is no migration step yet.
 - Drive keeps 30 days of file revisions — that is the recovery path for a bad overwrite.

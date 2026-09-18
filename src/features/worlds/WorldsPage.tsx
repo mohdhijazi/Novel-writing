@@ -3,20 +3,23 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { NameForm } from '@/components/NameForm';
 import { DriveStatus } from '@/features/drive/DriveStatus';
 import { useDrive } from '@/features/drive/driveContext';
+import { requestSync } from '@/features/sync/syncScheduler';
+import { useSync } from '@/features/sync/useSync';
 
 import { WorldList } from './WorldList';
 import styles from './WorldsPage.module.css';
-import { useWorldSync } from './useWorldSync';
 import { createWorld, listWorlds } from './worldsRepository';
 
 export function WorldsPage() {
   const { isConnected } = useDrive();
-  const { isSyncing, error, sync } = useWorldSync(isConnected);
+  const { isSyncing, error } = useSync(isConnected);
   const worlds = useLiveQuery(() => listWorlds());
 
   function handleCreate(name: string) {
     createWorld(name)
-      .then(sync)
+      .then(() => {
+        requestSync();
+      })
       .catch(() => {
         // Nothing to recover from: the world is either saved locally or not.
       });

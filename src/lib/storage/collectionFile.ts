@@ -2,19 +2,12 @@
  * Shape of the JSON files stored in a world's Drive folder. One file holds all
  * records of one kind; syncing merges record by record using `updatedAt`.
  *
- * The collections mirror the tabs of a world. Chapters will live inside a novel
- * once novels hold content, so there is no chapters file here.
+ * Novels are not here: they are folders of their own inside the world's folder,
+ * because a novel holds chapter folders rather than a flat list of records.
  */
 export const SCHEMA_VERSION = 1;
 
-export const COLLECTION_NAMES = [
-  'novels',
-  'characters',
-  'locations',
-  'events',
-  'ideas',
-  'links',
-] as const;
+export const COLLECTION_NAMES = ['characters', 'locations', 'events', 'ideas', 'links'] as const;
 
 export type CollectionName = (typeof COLLECTION_NAMES)[number];
 

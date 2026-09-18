@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Link, useParams } from 'react-router-dom';
 
 import { NameForm } from '@/components/NameForm';
+import { requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './NovelsTab.module.css';
 import { createNovel, listNovels } from './novelsRepository';
@@ -17,7 +18,9 @@ export function NovelsTab() {
     if (worldId === undefined) {
       return;
     }
-    void createNovel(worldId, title);
+    void createNovel(worldId, title).then(() => {
+      requestSync();
+    });
   }
 
   return (

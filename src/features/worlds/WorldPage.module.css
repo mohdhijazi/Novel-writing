@@ -60,3 +60,8 @@
   margin: 0;
   color: var(--color-text-muted);
 }
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+}

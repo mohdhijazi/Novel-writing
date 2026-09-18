@@ -1,12 +1,17 @@
 import { db } from '@/lib/db/database';
 
-import type { Chapter } from './types';
+import type { Chapter, ChapterDoc } from './types';
 
 export async function listChapters(novelId: string): Promise<Chapter[]> {
-  const chapters = await db.chapters.where('novelId').equals(novelId).toArray();
+  const chapters = await listChapterRecords(novelId);
   return chapters
     .filter((chapter) => chapter.deletedAt === null)
     .sort((a, b) => a.number - b.number);
+}
+
+/** Every chapter of a novel, deleted ones included — sync needs the tombstones. */
+export async function listChapterRecords(novelId: string): Promise<Chapter[]> {
+  return db.chapters.where('novelId').equals(novelId).toArray();
 }
 
 export async function getChapter(id: string): Promise<Chapter | null> {
@@ -28,11 +33,54 @@ export async function createChapter(novelId: string, title: string): Promise<Cha
     updatedAt: timestamp,
     deletedAt: null,
     driveFolderId: null,
+    driveParagraphsFileId: null,
+    driveParagraphsModifiedTime: null,
+    paragraphsRevision: 0,
+    paragraphsSyncedRevision: 0,
   };
   await db.chapters.add(chapter);
   return chapter;
 }
 
-export async function renameChapter(id: string, title: string): Promise<void> {
-  await db.chapters.update(id, { title, updatedAt: new Date().toISOString() });
+export async function setChapterDriveFolderId(id: string, driveFolderId: string): Promise<void> {
+  await db.chapters.update(id, { driveFolderId });
+}
+
+/** Records which Drive file holds the paragraphs, and what has already been synced. */
+export async function setChapterParagraphsSync(
+  id: string,
+  driveParagraphsFileId: string,
+  driveParagraphsModifiedTime: string,
+  paragraphsSyncedRevision: number,
+): Promise<void> {
+  await db.chapters.update(id, {
+    driveParagraphsFileId,
+    driveParagraphsModifiedTime,
+    paragraphsSyncedRevision,
+  });
+}
+
+/** Applies a chapter found on Drive, keeping whichever copy was updated last. */
+export async function mergeRemoteChapter(doc: ChapterDoc, driveFolderId: string): Promise<void> {
+  const local = await db.chapters.get(doc.id);
+  if (local && local.updatedAt >= doc.updatedAt) {
+    if (local.driveFolderId !== driveFolderId) {
+      await setChapterDriveFolderId(local.id, driveFolderId);
+    }
+    return;
+  }
+  await db.chapters.put({
+    id: doc.id,
+    novelId: doc.novelId,
+    number: doc.number,
+    title: doc.title,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+    deletedAt: doc.deletedAt,
+    driveFolderId,
+    driveParagraphsFileId: local?.driveParagraphsFileId ?? null,
+    driveParagraphsModifiedTime: local?.driveParagraphsModifiedTime ?? null,
+    paragraphsRevision: local?.paragraphsRevision ?? 0,
+    paragraphsSyncedRevision: local?.paragraphsSyncedRevision ?? 0,
+  });
 }
