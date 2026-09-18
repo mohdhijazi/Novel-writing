@@ -7,27 +7,17 @@ import {
 import { SCHEMA_VERSION, fileNameFor, type CollectionFile } from '@/lib/storage/collectionFile';
 
 import { listCharacterRecords, mergeRemoteCharacters } from './charactersRepository';
+import { toCharacterDoc } from './types';
 import type { Character, CharacterDoc } from './types';
 
 const FILE_NAME = fileNameFor('characters');
-
-function toDoc(character: Character): CharacterDoc {
-  return {
-    id: character.id,
-    firstName: character.firstName,
-    lastName: character.lastName,
-    createdAt: character.createdAt,
-    updatedAt: character.updatedAt,
-    deletedAt: character.deletedAt,
-  };
-}
 
 function toFile(characters: Character[]): CollectionFile<CharacterDoc> {
   return {
     schemaVersion: SCHEMA_VERSION,
     collection: 'characters',
     updatedAt: new Date().toISOString(),
-    records: characters.map(toDoc),
+    records: characters.map(toCharacterDoc),
   };
 }
 

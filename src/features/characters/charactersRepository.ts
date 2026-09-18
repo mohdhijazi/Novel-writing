@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/database';
 
-import type { Character, CharacterDoc } from './types';
+import { normalizeCharacter } from './types';
+import type { Character, CharacterDoc, CharacterTextField } from './types';
 
 export async function listCharacters(worldId: string): Promise<Character[]> {
   const characters = await listCharacterRecords(worldId);
@@ -9,9 +10,14 @@ export async function listCharacters(worldId: string): Promise<Character[]> {
     .sort((a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName));
 }
 
-/** Every character of a world, deleted ones included — sync needs the tombstones. */
+/**
+ * Every character of a world, deleted ones included — sync needs the tombstones.
+ * Records are normalized on the way out, so fields added after they were saved
+ * read as empty instead of undefined.
+ */
 export async function listCharacterRecords(worldId: string): Promise<Character[]> {
-  return db.characters.where('worldId').equals(worldId).toArray();
+  const characters = await db.characters.where('worldId').equals(worldId).toArray();
+  return characters.map(normalizeCharacter);
 }
 
 export async function createCharacter(
@@ -20,7 +26,7 @@ export async function createCharacter(
   lastName: string,
 ): Promise<Character> {
   const timestamp = new Date().toISOString();
-  const character: Character = {
+  const character = normalizeCharacter({
     id: crypto.randomUUID(),
     worldId,
     firstName,
@@ -28,9 +34,22 @@ export async function createCharacter(
     createdAt: timestamp,
     updatedAt: timestamp,
     deletedAt: null,
-  };
+  } as Character);
   await db.characters.add(character);
   return character;
+}
+
+export async function saveCharacterField(
+  id: string,
+  field: CharacterTextField,
+  value: string,
+): Promise<void> {
+  await db.characters.update(id, { [field]: value, updatedAt: new Date().toISOString() });
+}
+
+export async function deleteCharacter(id: string): Promise<void> {
+  const timestamp = new Date().toISOString();
+  await db.characters.update(id, { deletedAt: timestamp, updatedAt: timestamp });
 }
 
 /**
@@ -55,7 +74,7 @@ export async function mergeRemoteCharacters(
       }
       continue;
     }
-    toStore.push({ ...doc, worldId });
+    toStore.push(normalizeCharacter({ ...doc, worldId }));
   }
 
   const remoteIds = new Set(docs.map((doc) => doc.id));

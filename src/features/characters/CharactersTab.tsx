@@ -3,10 +3,10 @@ import { useParams } from 'react-router-dom';
 
 import { requestSync } from '@/features/sync/syncScheduler';
 
+import { CharacterCard } from './CharacterCard';
 import { CharacterForm } from './CharacterForm';
 import styles from './CharactersTab.module.css';
 import { createCharacter, listCharacters } from './charactersRepository';
-import { characterFullName } from './types';
 
 export function CharactersTab() {
   const { worldId } = useParams();
@@ -31,9 +31,7 @@ export function CharactersTab() {
       {characters && characters.length > 0 ? (
         <ul className={styles.list}>
           {characters.map((character) => (
-            <li key={character.id} className={styles.item}>
-              {characterFullName(character)}
-            </li>
+            <CharacterCard key={character.id} character={character} />
           ))}
         </ul>
       ) : (
