@@ -30,7 +30,9 @@ My Drive/
       calendar.json           one record: the world's calendar (id = world id)
       events.json
       ideas.json
-      links.json
+      relations.json          one per relation board
+      tickets.json            cards on those boards
+      ticketLinks.json        labelled lines between cards
       Novels/
         <Novel title>/
           novel.json
@@ -86,7 +88,9 @@ The user wants the code **super organized and very clean, always**.
   (`CharacterList.tsx`).
 - **Styling:** CSS Modules (`Component.module.css`) next to the component. Use the tokens in
   `global.css` — add a token rather than hard-coding a color, size, or spacing value.
-- **Imports:** use the `@/` alias for anything outside the current feature folder.
+- **Imports:** use the `@/` alias for anything outside the current feature folder. A feature may
+  call another feature's repository (relations reads characters and locations) but never reaches
+  into its components; board drag/link behaviour is shared through `lib/map/`.
 - **Routing:** React Router with `HashRouter` (`#/worlds/<id>/<tab>`). Hash URLs avoid GitHub Pages
   404s on refreshed deep links and keep the back button/iPad back-swipe working.
 - **Deleting:** every delete goes through `components/HoldToDelete` — a 4-second hold with a

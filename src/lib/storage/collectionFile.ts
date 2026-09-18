@@ -14,7 +14,9 @@ export const COLLECTION_NAMES = [
   'calendar',
   'events',
   'ideas',
-  'links',
+  'relations',
+  'tickets',
+  'ticketLinks',
 ] as const;
 
 export type CollectionName = (typeof COLLECTION_NAMES)[number];

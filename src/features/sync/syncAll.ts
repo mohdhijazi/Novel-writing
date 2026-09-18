@@ -5,6 +5,7 @@ import { syncConnectionsForWorld } from '@/features/locations/syncConnections';
 import { syncIdeasForWorld } from '@/features/ideas/syncIdeas';
 import { syncLocationsForWorld } from '@/features/locations/syncLocations';
 import { syncNovelsForWorld } from '@/features/novels/syncNovels';
+import { syncRelationsForWorld } from '@/features/relations/syncRelations';
 import { syncWorlds } from '@/features/worlds/syncWorlds';
 
 /** One full pass: worlds first, then the contents of each world. */
@@ -16,6 +17,7 @@ export async function syncAll(): Promise<void> {
     await syncIdeasForWorld(world.worldId, world.driveFolderId);
     await syncLocationsForWorld(world.worldId, world.driveFolderId);
     await syncConnectionsForWorld(world.worldId, world.driveFolderId);
+    await syncRelationsForWorld(world.worldId, world.driveFolderId);
     await syncNovelsForWorld(world.worldId, world.driveFolderId);
   }
 }

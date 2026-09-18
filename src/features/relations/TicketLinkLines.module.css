@@ -1,0 +1,28 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Lines are decoration; the tickets underneath stay clickable. */
+  pointer-events: none;
+}
+
+.line {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--color-text);
+  paint-order: stroke;
+  stroke: var(--color-bg);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.preview {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}

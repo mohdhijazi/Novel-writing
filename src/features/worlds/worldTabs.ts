@@ -9,7 +9,7 @@ export const WORLD_TABS = [
   { slug: 'locations', label: 'Locations' },
   { slug: 'events', label: 'Events' },
   { slug: 'ideas', label: 'Ideas' },
-  { slug: 'links', label: 'Links' },
+  { slug: 'relations', label: 'Relations' },
   { slug: 'calendar', label: 'Calendar', separated: true },
 ] as const;
 

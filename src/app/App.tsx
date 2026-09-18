@@ -9,6 +9,8 @@ import { LocationsTab } from '@/features/locations/LocationsTab';
 import { ChapterEditorPage } from '@/features/novels/ChapterEditorPage';
 import { NovelPage } from '@/features/novels/NovelPage';
 import { NovelsTab } from '@/features/novels/NovelsTab';
+import { RelationBoard } from '@/features/relations/RelationBoard';
+import { RelationsTab } from '@/features/relations/RelationsTab';
 import { WorldPage } from '@/features/worlds/WorldPage';
 import { WorldTabPanel } from '@/features/worlds/WorldTabPanel';
 import { WorldsPage } from '@/features/worlds/WorldsPage';
@@ -28,6 +30,8 @@ export function App() {
             <Route path="calendar" element={<CalendarTab />} />
             <Route path="events" element={<EventsTab />} />
             <Route path="ideas" element={<IdeasTab />} />
+            <Route path="relations" element={<RelationsTab />} />
+            <Route path="relations/:relationId" element={<RelationBoard />} />
             <Route path="novels/:novelId" element={<NovelPage />} />
             <Route path="novels/:novelId/chapters/:chapterId" element={<ChapterEditorPage />} />
             <Route path=":tabSlug" element={<WorldTabPanel />} />

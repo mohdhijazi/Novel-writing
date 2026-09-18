@@ -1,7 +1,9 @@
 import { db } from '@/lib/db/database';
 import { mergeByUpdatedAt } from '@/lib/storage/mergeRecords';
 
-import type { Connection, ConnectionDoc, LocationSide } from './types';
+import type { MapSide } from '@/lib/map/geometry';
+
+import type { Connection, ConnectionDoc } from './types';
 
 export async function listConnections(worldId: string): Promise<Connection[]> {
   const connections = await listConnectionRecords(worldId);
@@ -19,7 +21,7 @@ export async function listConnectionRecords(worldId: string): Promise<Connection
  */
 export async function createConnection(
   worldId: string,
-  from: { id: string; side: LocationSide },
+  from: { id: string; side: MapSide },
   toId: string,
 ): Promise<void> {
   if (from.id === toId) {

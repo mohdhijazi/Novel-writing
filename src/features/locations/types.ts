@@ -1,3 +1,4 @@
+import type { MapSide } from '@/lib/map/geometry';
 import type { StoredRecord } from '@/lib/storage/collectionFile';
 
 /** A place in a world, positioned on the world's map area. */
@@ -30,11 +31,6 @@ export function normalizeLocation(record: Location): Location {
   return { ...EMPTY_TEXT_FIELDS, ...record };
 }
 
-/** Which edge of a square a connection leaves from or arrives at. */
-export type LocationSide = 'top' | 'right' | 'bottom' | 'left';
-
-export const LOCATION_SIDES: LocationSide[] = ['top', 'right', 'bottom', 'left'];
-
 /**
  * A link between two locations, drawn as a line on the map. Only the side the
  * line leaves from is stored, because that is the one the user chose; the end
@@ -44,7 +40,7 @@ export const LOCATION_SIDES: LocationSide[] = ['top', 'right', 'bottom', 'left']
 export interface Connection extends StoredRecord {
   worldId: string;
   fromId: string;
-  fromSide: LocationSide;
+  fromSide: MapSide;
   toId: string;
   createdAt: string;
 }

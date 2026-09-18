@@ -1,5 +1,7 @@
 import styles from './ConnectionLines.module.css';
-import { MAP_HEIGHT, MAP_WIDTH, anchorFor, sideFacing, type Point } from './mapLayout';
+import { anchorFor, sideFacing, type Point } from '@/lib/map/geometry';
+
+import { MAP_HEIGHT, MAP_WIDTH, SQUARE_SIZE } from './mapLayout';
 import type { Connection, Location } from './types';
 
 interface ConnectionLinesProps {
@@ -24,8 +26,8 @@ export function ConnectionLines({ connections, locationsById, preview }: Connect
         if (!from || !to) {
           return null;
         }
-        const start = anchorFor(from, connection.fromSide);
-        const end = anchorFor(to, sideFacing(start, to));
+        const start = anchorFor(from, connection.fromSide, SQUARE_SIZE);
+        const end = anchorFor(to, sideFacing(start, to, SQUARE_SIZE), SQUARE_SIZE);
         return (
           <line
             key={connection.id}
