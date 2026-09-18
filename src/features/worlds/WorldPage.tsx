@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Fragment } from 'react';
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
 
 import { useDrive } from '@/features/drive/driveContext';
@@ -44,9 +45,12 @@ export function WorldPage() {
       {/* NavLink marks the active tab with aria-current, which the stylesheet picks up. */}
       <nav className={styles.tabs} aria-label="World sections">
         {WORLD_TABS.map((tab) => (
-          <NavLink key={tab.slug} to={tab.slug} className={styles.tab}>
-            {tab.label}
-          </NavLink>
+          <Fragment key={tab.slug}>
+            {'separated' in tab && <span className={styles.spacer} aria-hidden="true" />}
+            <NavLink to={tab.slug} className={styles.tab}>
+              {tab.label}
+            </NavLink>
+          </Fragment>
         ))}
       </nav>
 
