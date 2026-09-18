@@ -1,7 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 
 import type { Character } from '@/features/characters/types';
-import type { Location } from '@/features/locations/types';
+import type { Connection, Location } from '@/features/locations/types';
 import type { Chapter, Novel, Paragraph } from '@/features/novels/types';
 import type { World } from '@/features/worlds/types';
 
@@ -19,6 +19,7 @@ class WorldBuildingDatabase extends Dexie {
   paragraphs!: EntityTable<Paragraph, 'id'>;
   characters!: EntityTable<Character, 'id'>;
   locations!: EntityTable<Location, 'id'>;
+  connections!: EntityTable<Connection, 'id'>;
 
   constructor() {
     super('world-building');
@@ -36,6 +37,9 @@ class WorldBuildingDatabase extends Dexie {
     });
     this.version(4).stores({
       locations: 'id, worldId, updatedAt',
+    });
+    this.version(5).stores({
+      connections: 'id, worldId, fromId, toId, updatedAt',
     });
   }
 }

@@ -29,3 +29,25 @@ const EMPTY_TEXT_FIELDS: Record<LocationTextField, string> = { name: '', type: '
 export function normalizeLocation(record: Location): Location {
   return { ...EMPTY_TEXT_FIELDS, ...record };
 }
+
+/** Which edge of a square a connection leaves from or arrives at. */
+export type LocationSide = 'top' | 'right' | 'bottom' | 'left';
+
+export const LOCATION_SIDES: LocationSide[] = ['top', 'right', 'bottom', 'left'];
+
+/**
+ * A link between two locations, drawn as a line on the map. Only the side the
+ * line leaves from is stored, because that is the one the user chose; the end
+ * it arrives at is worked out at draw time, so it stays correct when either
+ * square moves.
+ */
+export interface Connection extends StoredRecord {
+  worldId: string;
+  fromId: string;
+  fromSide: LocationSide;
+  toId: string;
+  createdAt: string;
+}
+
+/** A connection as stored in `connections.json`. */
+export type ConnectionDoc = Omit<Connection, 'worldId'>;

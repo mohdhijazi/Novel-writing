@@ -41,3 +41,55 @@
   color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
+
+.handle {
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: crosshair;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  opacity: 0;
+  touch-action: none;
+}
+
+.square:hover .handle,
+.square[data-selected='true'] .handle,
+.handle:focus-visible {
+  opacity: 1;
+}
+
+.handle:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+.handle[data-side='top'] {
+  top: -0.625rem;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.handle[data-side='bottom'] {
+  bottom: -0.625rem;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.handle[data-side='left'] {
+  top: 50%;
+  left: -0.625rem;
+  translate: 0 -50%;
+}
+
+.handle[data-side='right'] {
+  top: 50%;
+  right: -0.625rem;
+  translate: 0 -50%;
+}

@@ -5,7 +5,7 @@ import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 import styles from './LocationSquare.module.css';
 import { moveLocation } from './locationsRepository';
 import { SQUARE_SIZE, clampToMap } from './mapLayout';
-import type { Location } from './types';
+import { LOCATION_SIDES, type Location, type LocationSide } from './types';
 
 /** Movement under this many pixels counts as a tap, which opens the details. */
 const DRAG_THRESHOLD_PX = 4;
@@ -24,9 +24,16 @@ interface LocationSquareProps {
   mapRef: RefObject<HTMLDivElement | null>;
   isSelected: boolean;
   onSelect: () => void;
+  onStartConnection: (side: LocationSide) => void;
 }
 
-export function LocationSquare({ location, mapRef, isSelected, onSelect }: LocationSquareProps) {
+export function LocationSquare({
+  location,
+  mapRef,
+  isSelected,
+  onSelect,
+  onStartConnection,
+}: LocationSquareProps) {
   const squareRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
 
@@ -89,6 +96,7 @@ export function LocationSquare({ location, mapRef, isSelected, onSelect }: Locat
     <div
       ref={squareRef}
       className={styles.square}
+      data-location-id={location.id}
       data-selected={isSelected}
       style={{ left: location.x, top: location.y, width: SQUARE_SIZE, height: SQUARE_SIZE }}
       onPointerDown={handlePointerDown}
@@ -98,6 +106,23 @@ export function LocationSquare({ location, mapRef, isSelected, onSelect }: Locat
     >
       <span className={styles.name}>{location.name || 'Untitled'}</span>
       {location.type !== '' && <span className={styles.type}>{location.type}</span>}
+
+      {LOCATION_SIDES.map((side) => (
+        <button
+          key={side}
+          type="button"
+          className={styles.handle}
+          data-side={side}
+          aria-label={`Connect from the ${side} of ${location.name || 'this location'}`}
+          onPointerDown={(event) => {
+            // Keep the square from starting a drag of its own.
+            event.stopPropagation();
+            onStartConnection(side);
+          }}
+        >
+          +
+        </button>
+      ))}
     </div>
   );
 }

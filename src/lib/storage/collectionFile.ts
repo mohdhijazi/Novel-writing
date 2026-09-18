@@ -7,7 +7,14 @@
  */
 export const SCHEMA_VERSION = 1;
 
-export const COLLECTION_NAMES = ['characters', 'locations', 'events', 'ideas', 'links'] as const;
+export const COLLECTION_NAMES = [
+  'characters',
+  'locations',
+  'connections',
+  'events',
+  'ideas',
+  'links',
+] as const;
 
 export type CollectionName = (typeof COLLECTION_NAMES)[number];
 

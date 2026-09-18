@@ -4,15 +4,23 @@ import { AutosaveField } from '@/components/AutosaveField';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './LocationDetails.module.css';
+import { deleteConnection } from './connectionsRepository';
 import { deleteLocation, saveLocationField } from './locationsRepository';
-import type { Location, LocationTextField } from './types';
+import type { Connection, Location, LocationTextField } from './types';
 
 interface LocationDetailsProps {
   location: Location;
+  connections: Connection[];
+  locationsById: Map<string, Location>;
   onClose: () => void;
 }
 
-export function LocationDetails({ location, onClose }: LocationDetailsProps) {
+export function LocationDetails({
+  location,
+  connections,
+  locationsById,
+  onClose,
+}: LocationDetailsProps) {
   const save = useCallback(
     (field: LocationTextField, value: string) => {
       void saveLocationField(location.id, field, value).then(() => {
@@ -55,6 +63,41 @@ export function LocationDetails({ location, onClose }: LocationDetailsProps) {
           }}
         />
       </div>
+
+      <section className={styles.connections}>
+        <h4 className={styles.subheading}>Connections</h4>
+        {connections.length === 0 ? (
+          <p className={styles.note}>
+            None yet. Drag a + on the square onto another one to connect them.
+          </p>
+        ) : (
+          <ul className={styles.list}>
+            {connections.map((connection) => {
+              const otherId =
+                connection.fromId === location.id ? connection.toId : connection.fromId;
+              const other = locationsById.get(otherId);
+              const otherName = other && other.name !== '' ? other.name : 'Untitled location';
+              return (
+                <li key={connection.id} className={styles.item}>
+                  <span>{otherName}</span>
+                  <button
+                    type="button"
+                    className={styles.remove}
+                    aria-label={`Remove connection to ${otherName}`}
+                    onClick={() => {
+                      void deleteConnection(connection.id).then(() => {
+                        requestSync(EDIT_SYNC_DELAY_MS);
+                      });
+                    }}
+                  >
+                    ×
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
 
       <button
         type="button"

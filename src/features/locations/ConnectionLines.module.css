@@ -1,0 +1,18 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Lines are decoration; the squares underneath stay clickable. */
+  pointer-events: none;
+}
+
+.line {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.preview {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
