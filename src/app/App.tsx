@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { CalendarTab } from '@/features/calendar/CalendarTab';
 import { CharactersTab } from '@/features/characters/CharactersTab';
+import { EventsTab } from '@/features/events/EventsTab';
 import { DriveProvider } from '@/features/drive/DriveProvider';
 import { LocationsTab } from '@/features/locations/LocationsTab';
 import { ChapterEditorPage } from '@/features/novels/ChapterEditorPage';
@@ -24,6 +25,7 @@ export function App() {
             <Route path="characters" element={<CharactersTab />} />
             <Route path="locations" element={<LocationsTab />} />
             <Route path="calendar" element={<CalendarTab />} />
+            <Route path="events" element={<EventsTab />} />
             <Route path="novels/:novelId" element={<NovelPage />} />
             <Route path="novels/:novelId/chapters/:chapterId" element={<ChapterEditorPage />} />
             <Route path=":tabSlug" element={<WorldTabPanel />} />
