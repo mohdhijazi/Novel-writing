@@ -41,36 +41,40 @@ export function LocationsTab() {
         <p className={styles.hint}>Drag a square to move it. Click it to edit the details.</p>
       </div>
 
-      <div className={styles.viewport}>
-        <div
-          ref={mapRef}
-          className={styles.map}
-          style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}
-          aria-label="Map area"
-        >
-          {locations?.map((location) => (
-            <LocationSquare
-              key={location.id}
-              location={location}
-              mapRef={mapRef}
-              isSelected={location.id === selectedId}
-              onSelect={() => {
-                setSelectedId(location.id);
+      <div className={styles.content}>
+        <div className={styles.viewport}>
+          <div
+            ref={mapRef}
+            className={styles.map}
+            style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}
+            aria-label="Map area"
+          >
+            {locations?.map((location) => (
+              <LocationSquare
+                key={location.id}
+                location={location}
+                mapRef={mapRef}
+                isSelected={location.id === selectedId}
+                onSelect={() => {
+                  setSelectedId(location.id);
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {selected && (
+          <div className={styles.side}>
+            <LocationDetails
+              key={selected.id}
+              location={selected}
+              onClose={() => {
+                setSelectedId(null);
               }}
             />
-          ))}
-        </div>
+          </div>
+        )}
       </div>
-
-      {selected && (
-        <LocationDetails
-          key={selected.id}
-          location={selected}
-          onClose={() => {
-            setSelectedId(null);
-          }}
-        />
-      )}
     </section>
   );
 }
