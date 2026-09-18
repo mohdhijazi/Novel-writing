@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { AutosaveField } from '@/components/AutosaveField';
+import { HoldToDelete } from '@/components/HoldToDelete';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './CharacterCard.module.css';
@@ -52,17 +53,17 @@ export function CharacterCard({ character }: { character: Character }) {
             </section>
           ))}
 
-          <button
-            type="button"
+          <HoldToDelete
             className={styles.delete}
-            onClick={() => {
+            label="Delete character"
+            onDelete={() => {
               void deleteCharacter(character.id).then(() => {
                 requestSync(EDIT_SYNC_DELAY_MS);
               });
             }}
           >
             Delete character
-          </button>
+          </HoldToDelete>
         </div>
       )}
     </li>

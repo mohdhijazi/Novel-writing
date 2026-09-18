@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 
 import { AutosaveField } from '@/components/AutosaveField';
+import { HoldToDelete } from '@/components/HoldToDelete';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './LocationDetails.module.css';
@@ -80,18 +81,17 @@ export function LocationDetails({
               return (
                 <li key={connection.id} className={styles.item}>
                   <span>{otherName}</span>
-                  <button
-                    type="button"
+                  <HoldToDelete
                     className={styles.remove}
-                    aria-label={`Remove connection to ${otherName}`}
-                    onClick={() => {
+                    label={`Remove connection to ${otherName}`}
+                    onDelete={() => {
                       void deleteConnection(connection.id).then(() => {
                         requestSync(EDIT_SYNC_DELAY_MS);
                       });
                     }}
                   >
                     ×
-                  </button>
+                  </HoldToDelete>
                 </li>
               );
             })}
@@ -99,10 +99,10 @@ export function LocationDetails({
         )}
       </section>
 
-      <button
-        type="button"
+      <HoldToDelete
         className={styles.delete}
-        onClick={() => {
+        label="Delete location"
+        onDelete={() => {
           void deleteLocation(location.id).then(() => {
             onClose();
             requestSync(EDIT_SYNC_DELAY_MS);
@@ -110,7 +110,7 @@ export function LocationDetails({
         }}
       >
         Delete location
-      </button>
+      </HoldToDelete>
     </aside>
   );
 }

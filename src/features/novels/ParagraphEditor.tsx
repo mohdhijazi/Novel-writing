@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { HoldToDelete } from '@/components/HoldToDelete';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './ParagraphEditor.module.css';
@@ -49,19 +50,17 @@ export function ParagraphEditor({ paragraph }: { paragraph: Paragraph }) {
         rows={1}
         aria-label="Paragraph"
       />
-      <button
-        type="button"
+      <HoldToDelete
         className={styles.delete}
-        onClick={() => {
+        label="Delete paragraph"
+        onDelete={() => {
           void deleteParagraph(paragraph.id).then(() => {
             requestSync(EDIT_SYNC_DELAY_MS);
           });
         }}
-        aria-label="Delete paragraph"
-        title="Delete paragraph"
       >
         ×
-      </button>
+      </HoldToDelete>
     </div>
   );
 }

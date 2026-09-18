@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 
 import { AutosaveField } from '@/components/AutosaveField';
+import { HoldToDelete } from '@/components/HoldToDelete';
 import type { CalendarMonth } from '@/features/calendar/types';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
@@ -113,17 +114,17 @@ export function EventCard({ event, months }: EventCardProps) {
             }}
           />
 
-          <button
-            type="button"
+          <HoldToDelete
             className={styles.delete}
-            onClick={() => {
+            label="Delete event"
+            onDelete={() => {
               void deleteEvent(event.id).then(() => {
                 requestSync(EDIT_SYNC_DELAY_MS);
               });
             }}
           >
             Delete event
-          </button>
+          </HoldToDelete>
         </div>
       )}
     </li>

@@ -26,6 +26,8 @@ My Drive/
       world.json              { schemaVersion, id, name, createdAt, updatedAt, deletedAt }
       characters.json         one file per collection, all records of that kind
       locations.json
+      connections.json        links between locations, drawn on the map
+      calendar.json           one record: the world's calendar (id = world id)
       events.json
       ideas.json
       links.json
@@ -87,6 +89,8 @@ The user wants the code **super organized and very clean, always**.
 - **Imports:** use the `@/` alias for anything outside the current feature folder.
 - **Routing:** React Router with `HashRouter` (`#/worlds/<id>/<tab>`). Hash URLs avoid GitHub Pages
   404s on refreshed deep links and keep the back button/iPad back-swipe working.
+- **Deleting:** every delete goes through `components/HoldToDelete` — a 4-second hold with a
+  countdown on the button. There is no undo, so deletes must take deliberate intent.
 - **No dead code:** no placeholders, unused exports, commented-out code, or speculative
   abstractions. Add a library when a feature needs it (e.g. Dexie with the first stored data).
 - Comments explain _why_, not _what_.

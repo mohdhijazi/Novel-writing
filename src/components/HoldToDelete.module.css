@@ -1,0 +1,25 @@
+.button {
+  position: relative;
+  overflow: hidden;
+  /* Holding must not start a text selection or a scroll on touch. */
+  touch-action: none;
+  user-select: none;
+}
+
+.progress {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--color-danger);
+  opacity: 0.25;
+  transition: width var(--hold-tick, 100ms) linear;
+}
+
+.content {
+  position: relative;
+}
+
+.button[data-holding='true'] {
+  color: var(--color-danger);
+}

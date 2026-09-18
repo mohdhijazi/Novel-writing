@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useParams } from 'react-router-dom';
 
 import { AutosaveField } from '@/components/AutosaveField';
+import { HoldToDelete } from '@/components/HoldToDelete';
 import { NameForm } from '@/components/NameForm';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
@@ -49,18 +50,17 @@ export function IdeasTab() {
                   }}
                 />
               </div>
-              <button
-                type="button"
+              <HoldToDelete
                 className={styles.delete}
-                aria-label={`Delete idea: ${idea.text}`}
-                onClick={() => {
+                label={`Delete idea: ${idea.text}`}
+                onDelete={() => {
                   void deleteIdea(idea.id).then(() => {
                     requestSync(EDIT_SYNC_DELAY_MS);
                   });
                 }}
               >
                 ×
-              </button>
+              </HoldToDelete>
             </li>
           ))}
         </ul>
