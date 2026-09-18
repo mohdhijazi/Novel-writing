@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 
+import type { Character } from '@/features/characters/types';
 import type { Chapter, Novel, Paragraph } from '@/features/novels/types';
 import type { World } from '@/features/worlds/types';
 
@@ -15,6 +16,7 @@ class WorldBuildingDatabase extends Dexie {
   novels!: EntityTable<Novel, 'id'>;
   chapters!: EntityTable<Chapter, 'id'>;
   paragraphs!: EntityTable<Paragraph, 'id'>;
+  characters!: EntityTable<Character, 'id'>;
 
   constructor() {
     super('world-building');
@@ -26,6 +28,9 @@ class WorldBuildingDatabase extends Dexie {
       novels: 'id, worldId, title, updatedAt',
       chapters: 'id, novelId, number, updatedAt',
       paragraphs: 'id, chapterId, [chapterId+order], updatedAt',
+    });
+    this.version(3).stores({
+      characters: 'id, worldId, lastName, updatedAt',
     });
   }
 }
