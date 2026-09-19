@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import styles from './ExportDialog.module.css';
 import { exportNovelPdf } from './exportNovelPdf';
+import { DEFAULT_PAPER_SIZE, PAPER_SIZES } from './pdfLayout';
 import type { Chapter, Novel } from './types';
 
 interface ExportDialogProps {
@@ -11,7 +12,10 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({ novel, chapters, onClose }: ExportDialogProps) {
+  const paperId = useId();
   const [chosenIds, setChosenIds] = useState(() => new Set(chapters.map((chapter) => chapter.id)));
+  const [paper, setPaper] = useState(DEFAULT_PAPER_SIZE);
+  const [includeTitlePage, setIncludeTitlePage] = useState(true);
   const [isWorking, setIsWorking] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -32,7 +36,7 @@ export function ExportDialog({ novel, chapters, onClose }: ExportDialogProps) {
   function handleExport() {
     setIsWorking(true);
     setFailed(false);
-    exportNovelPdf(novel, chosen)
+    exportNovelPdf(novel, chosen, { paper, includeTitlePage })
       .then(onClose)
       .catch(() => {
         setIsWorking(false);
@@ -46,9 +50,40 @@ export function ExportDialog({ novel, chapters, onClose }: ExportDialogProps) {
         <h2 id="export-title" className={styles.heading}>
           Export {novel.title}
         </h2>
-        <p className={styles.note}>
-          The PDF opens with a title page, then one chapter per page, in the order below.
-        </p>
+        <p className={styles.note}>One chapter per page, in the order below.</p>
+
+        <div className={styles.settings}>
+          <label className={styles.setting}>
+            <input
+              type="checkbox"
+              checked={includeTitlePage}
+              onChange={() => {
+                setIncludeTitlePage(!includeTitlePage);
+              }}
+            />
+            Open with a title page
+          </label>
+
+          <div className={styles.setting}>
+            <label htmlFor={paperId}>Paper</label>
+            <select
+              id={paperId}
+              className={styles.select}
+              value={paper.id}
+              onChange={(event) => {
+                setPaper(
+                  PAPER_SIZES.find((size) => size.id === event.target.value) ?? DEFAULT_PAPER_SIZE,
+                );
+              }}
+            >
+              {PAPER_SIZES.map((size) => (
+                <option key={size.id} value={size.id}>
+                  {size.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <div className={styles.selectors}>
           <button

@@ -5,13 +5,13 @@ import {
   BODY,
   HEADING,
   MIN_JUSTIFY_RATIO,
-  PAGE,
   PAGE_NUMBER,
-  TEXT_BOTTOM,
-  TEXT_WIDTH,
   TITLE_PAGE,
+  layoutFor,
   pdfFileName,
   toRoman,
+  type Layout,
+  type PaperSize,
 } from './pdfLayout';
 import type { Chapter, Novel } from './types';
 
@@ -63,8 +63,7 @@ async function registerBookFont(doc: jsPDF): Promise<string> {
  */
 function drawLine(doc: jsPDF, line: string, x: number, y: number, width: number): void {
   const words = line.split(' ').filter((word) => word !== '');
-  const naturalWidth = doc.getTextWidth(line);
-  if (words.length < 2 || naturalWidth < width * MIN_JUSTIFY_RATIO) {
+  if (words.length < 2 || doc.getTextWidth(line) < width * MIN_JUSTIFY_RATIO) {
     doc.text(line, x, y);
     return;
   }
@@ -81,22 +80,22 @@ interface Cursor {
   y: number;
 }
 
-function drawBlock(doc: jsPDF, text: string, cursor: Cursor): void {
+function drawBlock(doc: jsPDF, layout: Layout, text: string, cursor: Cursor): void {
   // The first line is shorter, to leave room for the indent.
-  const [firstLine = ''] = doc.splitTextToSize(text, TEXT_WIDTH - BODY.indent) as string[];
+  const [firstLine = ''] = doc.splitTextToSize(text, layout.measure - BODY.indent) as string[];
   const rest = text.slice(firstLine.length).trim();
-  const restLines = rest === '' ? [] : (doc.splitTextToSize(rest, TEXT_WIDTH) as string[]);
+  const restLines = rest === '' ? [] : (doc.splitTextToSize(rest, layout.measure) as string[]);
   const lines = [firstLine, ...restLines];
 
   for (const [index, line] of lines.entries()) {
-    if (cursor.y > TEXT_BOTTOM) {
+    if (cursor.y > layout.textBottom) {
       doc.addPage();
-      cursor.y = PAGE.margin + BODY.lineHeight;
+      cursor.y = layout.margin + BODY.lineHeight;
     }
     const isFirst = index === 0;
     const isLast = index === lines.length - 1;
-    const x = PAGE.margin + (isFirst ? BODY.indent : 0);
-    const width = TEXT_WIDTH - (isFirst ? BODY.indent : 0);
+    const x = layout.margin + (isFirst ? BODY.indent : 0);
+    const width = layout.measure - (isFirst ? BODY.indent : 0);
     if (isLast) {
       doc.text(line, x, cursor.y);
     } else {
@@ -111,83 +110,103 @@ function drawBlock(doc: jsPDF, text: string, cursor: Cursor): void {
  * A paragraph the writer broke into several lines — dialogue, most often — is
  * set as separate indented paragraphs, the way a book would.
  */
-function drawParagraph(doc: jsPDF, text: string, cursor: Cursor): void {
+function drawParagraph(doc: jsPDF, layout: Layout, text: string, cursor: Cursor): void {
   for (const block of text.split(/\r?\n/)) {
     const trimmed = block.trim();
     if (trimmed !== '') {
-      drawBlock(doc, trimmed, cursor);
+      drawBlock(doc, layout, trimmed, cursor);
     }
   }
 }
 
-function drawTitlePage(doc: jsPDF, title: string): void {
+function drawTitlePage(doc: jsPDF, layout: Layout, title: string): void {
   doc.setFontSize(TITLE_PAGE.size);
   doc.setLineWidth(0.5);
-  doc.text(title, PAGE.width / 2, PAGE.height * TITLE_PAGE.position, {
+  doc.text(title, layout.width / 2, layout.height * TITLE_PAGE.position, {
     align: 'center',
     renderingMode: 'fillThenStroke',
-    maxWidth: TEXT_WIDTH,
+    maxWidth: layout.measure,
   });
   doc.setLineWidth(0);
   doc.setFontSize(BODY.size);
 }
 
-function drawChapterHeading(doc: jsPDF, number: number, title: string): void {
-  const centre = PAGE.width / 2;
+function drawChapterHeading(doc: jsPDF, layout: Layout, number: number, title: string): void {
+  const centre = layout.width / 2;
   // The reference book sets headings bold; the variable font ships one weight,
   // so they are drawn with a light outline to carry the same weight on paper.
   doc.setFontSize(HEADING.size);
   doc.setLineWidth(0.4);
-  doc.text(`Chapter ${toRoman(number)}:`, centre, PAGE.margin + HEADING.topOffset, {
+  doc.text(`Chapter ${toRoman(number)}:`, centre, layout.margin + HEADING.topOffset, {
     align: 'center',
     renderingMode: 'fillThenStroke',
   });
   if (title.trim() !== '') {
-    doc.text(title, centre, PAGE.margin + HEADING.topOffset + HEADING.gap, {
+    doc.text(title, centre, layout.margin + HEADING.topOffset + HEADING.gap, {
       align: 'center',
       renderingMode: 'fillThenStroke',
-      maxWidth: TEXT_WIDTH,
+      maxWidth: layout.measure,
     });
   }
   doc.setLineWidth(0);
   doc.setFontSize(BODY.size);
 }
 
-/** Numbers every page but the title page, which counts as page one of the book. */
-function drawPageNumbers(doc: jsPDF): void {
+/** A title page counts as page one of the book but carries no number. */
+function drawPageNumbers(doc: jsPDF, layout: Layout, firstNumbered: number): void {
   doc.setFontSize(PAGE_NUMBER.size);
-  for (let page = 2; page <= doc.getNumberOfPages(); page += 1) {
+  for (let page = firstNumbered; page <= doc.getNumberOfPages(); page += 1) {
     doc.setPage(page);
-    doc.text(String(page - 1), PAGE.width - PAGE.margin, PAGE.height - PAGE_NUMBER.bottomOffset, {
-      align: 'right',
-    });
+    doc.text(
+      String(page - firstNumbered + 1),
+      layout.width - layout.margin,
+      layout.height - PAGE_NUMBER.bottomOffset,
+      { align: 'right' },
+    );
   }
+}
+
+export interface ExportOptions {
+  paper: PaperSize;
+  includeTitlePage: boolean;
 }
 
 /**
  * Writes the chosen chapters out as a PDF in the reference book's style — a
- * title page, then a page per chapter — and hands it to the browser to save.
+ * page per chapter, optionally opening with a title page — and hands it to the
+ * browser to save.
  */
-export async function exportNovelPdf(novel: Novel, chapters: Chapter[]): Promise<void> {
+export async function exportNovelPdf(
+  novel: Novel,
+  chapters: Chapter[],
+  options: ExportOptions,
+): Promise<void> {
   // Loaded on demand: the PDF library is far larger than the app itself.
   const { jsPDF } = await import('jspdf');
-  const doc = new jsPDF({ unit: 'pt', format: [PAGE.width, PAGE.height] });
+  const layout = layoutFor(options.paper);
+  const doc = new jsPDF({ unit: 'pt', format: [layout.width, layout.height] });
   const font = await registerBookFont(doc);
   doc.setFont(font, 'normal');
+  doc.setFontSize(BODY.size);
 
-  drawTitlePage(doc, novel.title);
+  if (options.includeTitlePage) {
+    drawTitlePage(doc, layout, novel.title);
+  }
 
   const cursor: Cursor = { y: 0 };
-  for (const chapter of chapters) {
-    doc.addPage();
-    drawChapterHeading(doc, chapter.number, chapter.title);
-    cursor.y = PAGE.margin + HEADING.topOffset + HEADING.gap + HEADING.spaceBelow;
+  for (const [index, chapter] of chapters.entries()) {
+    // The first chapter uses the page already there unless a title page took it.
+    if (options.includeTitlePage || index > 0) {
+      doc.addPage();
+    }
+    drawChapterHeading(doc, layout, chapter.number, chapter.title);
+    cursor.y = layout.margin + HEADING.topOffset + HEADING.gap + HEADING.spaceBelow;
 
     for (const paragraph of await listParagraphs(chapter.id)) {
-      drawParagraph(doc, paragraph.text, cursor);
+      drawParagraph(doc, layout, paragraph.text, cursor);
     }
   }
 
-  drawPageNumbers(doc);
+  drawPageNumbers(doc, layout, options.includeTitlePage ? 2 : 1);
   doc.save(pdfFileName(novel.title));
 }

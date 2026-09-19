@@ -81,8 +81,11 @@ missing `format` or world name stops the import. Imported files reference months
 595.28 pt), EB Garamond, justified body at 11/16 pt with an indented first line, centred chapter
 headings reading "Chapter I:" over the chapter title, page number bottom-right and no running
 headers. The novel's title gets a page of its own, which carries no number, so the first chapter
-page reads "1". `ExportDialog` picks which chapters go in; chapters keep their own numbers whether
-or not their neighbours were included. Measurements live in `pdfLayout.ts`.
+page reads "1". `ExportDialog` picks which chapters go in, whether to open with a title page, and the paper size;
+chapters keep their own numbers whether or not their neighbours were included. Measurements live in
+`pdfLayout.ts`: type sizes are fixed whatever the paper, while margins are 15% of the page width,
+widening further so a line never runs past `MAX_MEASURE` — a wide page gets wider margins rather
+than lines too long to read.
 
 A line is only stretched to the measure when it already fills most of it (`MIN_JUSTIFY_RATIO`), and
 a line break inside a paragraph starts a new indented paragraph. Without both, dialogue came out
