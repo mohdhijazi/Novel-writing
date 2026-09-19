@@ -35,6 +35,24 @@ export async function createLocation(worldId: string, x: number, y: number): Pro
   return location;
 }
 
+/** Adds locations from an import file; returns their ids keyed by name. */
+export async function addImportedLocations(
+  worldId: string,
+  imported: { name: string; type: string; area: string; x: number; y: number }[],
+): Promise<Map<string, string>> {
+  const timestamp = new Date().toISOString();
+  const locations = imported.map((entry) => ({
+    ...entry,
+    id: crypto.randomUUID(),
+    worldId,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    deletedAt: null,
+  }));
+  await db.locations.bulkAdd(locations);
+  return new Map(locations.map((location) => [location.name, location.id]));
+}
+
 export async function moveLocation(id: string, x: number, y: number): Promise<void> {
   await db.locations.update(id, { x, y, updatedAt: new Date().toISOString() });
 }

@@ -30,6 +30,24 @@ export async function createIdea(worldId: string, text: string): Promise<Idea> {
   return idea;
 }
 
+/** Adds ideas from an import file, newest last so the file's order is kept. */
+export async function addImportedIdeas(worldId: string, texts: string[]): Promise<void> {
+  const created = Date.now();
+  await db.ideas.bulkAdd(
+    texts.map((text, index) => {
+      const timestamp = new Date(created + index).toISOString();
+      return {
+        id: crypto.randomUUID(),
+        worldId,
+        text,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        deletedAt: null,
+      };
+    }),
+  );
+}
+
 export async function saveIdeaText(id: string, text: string): Promise<void> {
   await db.ideas.update(id, { text, updatedAt: new Date().toISOString() });
 }

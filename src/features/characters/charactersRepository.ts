@@ -40,6 +40,25 @@ export async function createCharacter(
   return character;
 }
 
+/** Adds characters from an import file, filling in whatever fields it carried. */
+export async function addImportedCharacters(
+  worldId: string,
+  imported: Record<string, string>[],
+): Promise<void> {
+  const timestamp = new Date().toISOString();
+  const characters = imported.map((fields) =>
+    normalizeCharacter({
+      ...fields,
+      id: crypto.randomUUID(),
+      worldId,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      deletedAt: null,
+    } as Character),
+  );
+  await db.characters.bulkAdd(characters);
+}
+
 export async function saveCharacterField(
   id: string,
   field: CharacterTextField,

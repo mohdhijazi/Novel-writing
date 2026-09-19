@@ -50,6 +50,26 @@ export async function createConnection(
   });
 }
 
+/** Adds connections from an import file, both ends already resolved to ids. */
+export async function addImportedConnections(
+  worldId: string,
+  pairs: { fromId: string; toId: string }[],
+): Promise<void> {
+  const timestamp = new Date().toISOString();
+  await db.connections.bulkAdd(
+    pairs.map((pair) => ({
+      id: crypto.randomUUID(),
+      worldId,
+      fromId: pair.fromId,
+      fromSide: 'right' as const,
+      toId: pair.toId,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      deletedAt: null,
+    })),
+  );
+}
+
 export async function deleteConnection(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
   await db.connections.update(id, { deletedAt: timestamp, updatedAt: timestamp });

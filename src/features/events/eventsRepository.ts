@@ -37,6 +37,24 @@ export async function createEvent(
   return event;
 }
 
+/** Adds events from an import file, months already resolved to ids. */
+export async function addImportedEvents(
+  worldId: string,
+  imported: { name: string; details: string; year: number; monthId: string; day: number }[],
+): Promise<void> {
+  const timestamp = new Date().toISOString();
+  await db.events.bulkAdd(
+    imported.map((entry) => ({
+      ...entry,
+      id: crypto.randomUUID(),
+      worldId,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      deletedAt: null,
+    })),
+  );
+}
+
 export async function updateEvent(
   id: string,
   patch: Partial<Pick<WorldEvent, 'name' | 'details' | 'year' | 'monthId' | 'day'>>,

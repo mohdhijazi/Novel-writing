@@ -62,6 +62,15 @@ My Drive/
   version keeps the files it had; there is no migration step yet.
 - Drive keeps 30 days of file revisions — that is the recovery path for a bad overwrite.
 
+## Importing a world
+
+`src/features/import/` turns a file written by someone else's AI into a new world. The prompt handed
+to that AI is built from `CHARACTER_FIELD_GROUPS`, so adding a character field updates the prompt
+automatically — keep it that way rather than restating the fields by hand. Parsing is deliberately
+forgiving: unknown keys are ignored, a record missing its name is skipped with a warning, and only a
+missing `format` or world name stops the import. Imported files reference months and locations by
+**name**; ids are resolved during the import.
+
 ## Commands
 
 - `npm run dev` — dev server at http://localhost:5173/Novel-writing/ (service worker disabled)

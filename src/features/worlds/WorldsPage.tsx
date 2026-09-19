@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { NameForm } from '@/components/NameForm';
 import { DriveStatus } from '@/features/drive/DriveStatus';
+import { ImportPanel } from '@/features/import/ImportPanel';
 import { useDrive } from '@/features/drive/driveContext';
 import { requestSync } from '@/features/sync/syncScheduler';
 import { useSync } from '@/features/sync/useSync';
@@ -47,6 +48,8 @@ export function WorldsPage() {
       ) : (
         <p className={styles.note}>No worlds yet. Create one to get started.</p>
       )}
+
+      <ImportPanel />
     </main>
   );
 }
