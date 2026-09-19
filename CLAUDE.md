@@ -96,8 +96,9 @@ The user wants the code **super organized and very clean, always**.
 - **Deleting:** every delete goes through `components/HoldToDelete` — a 2-second hold with a
   countdown on the button, 4 seconds for a whole world. There is no undo, so deletes must take
   deliberate intent.
-- Deleting a world only tombstones the record: its Drive folder stays, and sync skips deleted
-  worlds rather than touching their contents.
+- Deleting a world tombstones the record and moves its Drive folder to the bin, where it can still
+  be recovered. The other device notices its folder has gone from the root folder, checks whether it
+  was binned or merely moved elsewhere in Drive, and only deletes locally when it was binned.
 - **No dead code:** no placeholders, unused exports, commented-out code, or speculative
   abstractions. Add a library when a feature needs it (e.g. Dexie with the first stored data).
 - Comments explain _why_, not _what_.

@@ -134,6 +134,31 @@ export async function updateJsonFile(fileId: string, content: unknown): Promise<
   return readJson<DriveFile>(response);
 }
 
+/** Moves a file or folder to Drive's bin, where the user can still recover it. */
+export async function trashFile(fileId: string): Promise<void> {
+  await driveFetch(`${FILES_URL}/${fileId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': JSON_MIME_TYPE },
+    body: JSON.stringify({ trashed: true }),
+  });
+}
+
+/**
+ * Whether a file is in the bin, or null when it is gone for good. Used to tell
+ * a folder the user deleted from one they simply moved elsewhere in Drive.
+ */
+export async function getTrashState(fileId: string): Promise<{ trashed: boolean } | null> {
+  const headers = new Headers({ Authorization: `Bearer ${requireAccessToken()}` });
+  const response = await fetch(`${FILES_URL}/${fileId}?fields=trashed`, { headers });
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new Error(`Google Drive request failed (${String(response.status)}).`);
+  }
+  return readJson<{ trashed: boolean }>(response);
+}
+
 export async function downloadJsonFile<T>(fileId: string): Promise<T> {
   const response = await driveFetch(`${FILES_URL}/${fileId}?alt=media`);
   return readJson<T>(response);

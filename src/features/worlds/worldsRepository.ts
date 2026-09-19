@@ -42,6 +42,11 @@ export async function deleteWorld(id: string): Promise<void> {
   await db.worlds.update(id, { deletedAt: timestamp, updatedAt: timestamp });
 }
 
+/** Forgets the Drive folder after it has been binned, so it is binned only once. */
+export async function forgetDriveFolder(id: string): Promise<void> {
+  await db.worlds.update(id, { driveFolderId: null });
+}
+
 export async function setDriveFolderId(worldId: string, driveFolderId: string): Promise<void> {
   await db.worlds.update(worldId, { driveFolderId });
 }
