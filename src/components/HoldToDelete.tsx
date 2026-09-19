@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import styles from './HoldToDelete.module.css';
 
-/** How long the button must be held before it deletes. */
-const HOLD_MS = 4000;
+/** How long the button must be held before it deletes, unless asked otherwise. */
+const DEFAULT_HOLD_SECONDS = 2;
 /** How often the countdown redraws while holding. */
 const TICK_MS = 100;
 
@@ -14,6 +14,8 @@ interface HoldToDeleteProps {
   /** Normal button content, shown when not being held. */
   children: ReactNode;
   className?: string;
+  /** Longer for things that take the most with them, such as a whole world. */
+  holdSeconds?: number;
 }
 
 /**
@@ -21,7 +23,14 @@ interface HoldToDeleteProps {
  * left as it counts down. Deleting is the one action here with no undo, so it
  * asks for deliberate intent rather than a stray tap.
  */
-export function HoldToDelete({ onDelete, label, children, className }: HoldToDeleteProps) {
+export function HoldToDelete({
+  onDelete,
+  label,
+  children,
+  className,
+  holdSeconds = DEFAULT_HOLD_SECONDS,
+}: HoldToDeleteProps) {
+  const holdMs = holdSeconds * 1000;
   const [remaining, setRemaining] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -41,8 +50,8 @@ export function HoldToDelete({ onDelete, label, children, className }: HoldToDel
     if (timerRef.current !== null) {
       return;
     }
-    const endsAt = Date.now() + HOLD_MS;
-    setRemaining(Math.ceil(HOLD_MS / 1000));
+    const endsAt = Date.now() + holdMs;
+    setRemaining(holdSeconds);
     timerRef.current = setInterval(() => {
       const msLeft = endsAt - Date.now();
       if (msLeft <= 0) {
@@ -58,9 +67,7 @@ export function HoldToDelete({ onDelete, label, children, className }: HoldToDel
   useEffect(() => stopTimer, []);
 
   const isHolding = remaining !== null;
-  const progress = isHolding
-    ? ((Math.ceil(HOLD_MS / 1000) - remaining) / (HOLD_MS / 1000)) * 100
-    : 0;
+  const progress = isHolding ? ((holdSeconds - remaining) / holdSeconds) * 100 : 0;
 
   return (
     <button

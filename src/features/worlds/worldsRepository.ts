@@ -33,6 +33,15 @@ export async function createWorld(name: string): Promise<World> {
   return world;
 }
 
+/**
+ * Hides the world everywhere. Its folder stays in Drive, so the files are still
+ * there to recover by hand; syncing simply stops touching a deleted world.
+ */
+export async function deleteWorld(id: string): Promise<void> {
+  const timestamp = new Date().toISOString();
+  await db.worlds.update(id, { deletedAt: timestamp, updatedAt: timestamp });
+}
+
 export async function setDriveFolderId(worldId: string, driveFolderId: string): Promise<void> {
   await db.worlds.update(worldId, { driveFolderId });
 }
