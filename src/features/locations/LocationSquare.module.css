@@ -1,0 +1,95 @@
+.square {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  text-align: center;
+  cursor: grab;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  /* Let the pointer drag the square instead of scrolling the map on touch. */
+  touch-action: none;
+  user-select: none;
+}
+
+.square:hover {
+  border-color: var(--color-accent);
+}
+
+.square[data-selected='true'] {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.square:active {
+  cursor: grabbing;
+}
+
+.name {
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.type {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.handle {
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: crosshair;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  opacity: 0;
+  touch-action: none;
+}
+
+.square:hover .handle,
+.square[data-selected='true'] .handle,
+.handle:focus-visible {
+  opacity: 1;
+}
+
+.handle:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+.handle[data-side='top'] {
+  top: -0.625rem;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.handle[data-side='bottom'] {
+  bottom: -0.625rem;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.handle[data-side='left'] {
+  top: 50%;
+  left: -0.625rem;
+  translate: 0 -50%;
+}
+
+.handle[data-side='right'] {
+  top: 50%;
+  right: -0.625rem;
+  translate: 0 -50%;
+}

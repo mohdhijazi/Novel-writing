@@ -3,10 +3,15 @@ import { db } from '@/lib/db/database';
 import type { World, WorldDoc } from './types';
 
 export async function listWorlds(): Promise<World[]> {
-  const worlds = await db.worlds.toArray();
+  const worlds = await listWorldRecords();
   return worlds
     .filter((world) => world.deletedAt === null)
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Every world, deleted ones included — sync needs the tombstones. */
+export async function listWorldRecords(): Promise<World[]> {
+  return db.worlds.toArray();
 }
 
 export async function getWorld(id: string): Promise<World | null> {

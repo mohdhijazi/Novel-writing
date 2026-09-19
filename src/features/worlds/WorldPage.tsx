@@ -1,5 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Fragment } from 'react';
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
+
+import { useDrive } from '@/features/drive/driveContext';
+import { useSync } from '@/features/sync/useSync';
 
 import styles from './WorldPage.module.css';
 import { WORLD_TABS } from './worldTabs';
@@ -7,6 +11,8 @@ import { getWorld } from './worldsRepository';
 
 export function WorldPage() {
   const { worldId } = useParams();
+  const { isConnected } = useDrive();
+  const { isSyncing, error } = useSync(isConnected);
   const world = useLiveQuery(
     async () => (worldId === undefined ? null : await getWorld(worldId)),
     [worldId],
@@ -39,11 +45,17 @@ export function WorldPage() {
       {/* NavLink marks the active tab with aria-current, which the stylesheet picks up. */}
       <nav className={styles.tabs} aria-label="World sections">
         {WORLD_TABS.map((tab) => (
-          <NavLink key={tab.slug} to={tab.slug} className={styles.tab}>
-            {tab.label}
-          </NavLink>
+          <Fragment key={tab.slug}>
+            {'separated' in tab && <span className={styles.spacer} aria-hidden="true" />}
+            <NavLink to={tab.slug} className={styles.tab}>
+              {tab.label}
+            </NavLink>
+          </Fragment>
         ))}
       </nav>
+
+      {isSyncing && <p className={styles.note}>Syncing with Google Drive…</p>}
+      {error !== null && <p className={styles.error}>{error}</p>}
 
       <Outlet />
     </main>

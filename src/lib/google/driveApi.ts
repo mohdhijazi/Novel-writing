@@ -9,6 +9,8 @@ const MULTIPART_BOUNDARY = 'worlds-boundary';
 export interface DriveFile {
   id: string;
   name: string;
+  /** RFC 3339 timestamp, used to skip downloads that would change nothing. */
+  modifiedTime: string;
 }
 
 /** Escapes a value used inside a Drive query string literal. */
@@ -23,7 +25,7 @@ function escapeQueryValue(value: string): string {
  */
 function searchUrl(filters: string[]): string {
   const query = encodeURIComponent(filters.join(' and '));
-  return `${FILES_URL}?q=${query}&spaces=drive&fields=files(id,name)&pageSize=100`;
+  return `${FILES_URL}?q=${query}&spaces=drive&fields=files(id,name,modifiedTime)&pageSize=100`;
 }
 
 async function driveFetch(url: string, init?: RequestInit): Promise<Response> {
@@ -92,7 +94,7 @@ export async function listSubfolders(parentId: string): Promise<DriveFile[]> {
 }
 
 export async function createFolder(name: string, parentId?: string): Promise<DriveFile> {
-  const response = await driveFetch(`${FILES_URL}?fields=id,name`, {
+  const response = await driveFetch(`${FILES_URL}?fields=id,name,modifiedTime`, {
     method: 'POST',
     headers: { 'Content-Type': JSON_MIME_TYPE },
     body: JSON.stringify({
@@ -109,20 +111,27 @@ export async function createJsonFile(
   parentId: string,
   content: unknown,
 ): Promise<DriveFile> {
-  const response = await driveFetch(`${UPLOAD_URL}?uploadType=multipart&fields=id,name`, {
-    method: 'POST',
-    headers: { 'Content-Type': `multipart/related; boundary=${MULTIPART_BOUNDARY}` },
-    body: multipartBody({ name, mimeType: JSON_MIME_TYPE, parents: [parentId] }, content),
-  });
+  const response = await driveFetch(
+    `${UPLOAD_URL}?uploadType=multipart&fields=id,name,modifiedTime`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': `multipart/related; boundary=${MULTIPART_BOUNDARY}` },
+      body: multipartBody({ name, mimeType: JSON_MIME_TYPE, parents: [parentId] }, content),
+    },
+  );
   return readJson<DriveFile>(response);
 }
 
-export async function updateJsonFile(fileId: string, content: unknown): Promise<void> {
-  await driveFetch(`${UPLOAD_URL}/${fileId}?uploadType=media`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': JSON_MIME_TYPE },
-    body: JSON.stringify(content, null, 2),
-  });
+export async function updateJsonFile(fileId: string, content: unknown): Promise<DriveFile> {
+  const response = await driveFetch(
+    `${UPLOAD_URL}/${fileId}?uploadType=media&fields=id,name,modifiedTime`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': JSON_MIME_TYPE },
+      body: JSON.stringify(content, null, 2),
+    },
+  );
+  return readJson<DriveFile>(response);
 }
 
 export async function downloadJsonFile<T>(fileId: string): Promise<T> {

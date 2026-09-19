@@ -1,6 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link, useParams } from 'react-router-dom';
 
+import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
+
 import styles from './ChapterEditorPage.module.css';
 import { ParagraphEditor } from './ParagraphEditor';
 import { getChapter } from './chaptersRepository';
@@ -48,7 +50,9 @@ export function ChapterEditorPage() {
         className={styles.add}
         onClick={() => {
           if (chapterId !== undefined) {
-            void appendParagraph(chapterId);
+            void appendParagraph(chapterId).then(() => {
+              requestSync(EDIT_SYNC_DELAY_MS);
+            });
           }
         }}
       >

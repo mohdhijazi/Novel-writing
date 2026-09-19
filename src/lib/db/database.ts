@@ -1,5 +1,11 @@
 import Dexie, { type EntityTable } from 'dexie';
 
+import type { WorldCalendar } from '@/features/calendar/types';
+import type { Character } from '@/features/characters/types';
+import type { WorldEvent } from '@/features/events/types';
+import type { Idea } from '@/features/ideas/types';
+import type { Connection, Location } from '@/features/locations/types';
+import type { Relation, Ticket, TicketLink } from '@/features/relations/types';
 import type { Chapter, Novel, Paragraph } from '@/features/novels/types';
 import type { World } from '@/features/worlds/types';
 
@@ -15,6 +21,15 @@ class WorldBuildingDatabase extends Dexie {
   novels!: EntityTable<Novel, 'id'>;
   chapters!: EntityTable<Chapter, 'id'>;
   paragraphs!: EntityTable<Paragraph, 'id'>;
+  characters!: EntityTable<Character, 'id'>;
+  locations!: EntityTable<Location, 'id'>;
+  connections!: EntityTable<Connection, 'id'>;
+  calendars!: EntityTable<WorldCalendar, 'id'>;
+  events!: EntityTable<WorldEvent, 'id'>;
+  ideas!: EntityTable<Idea, 'id'>;
+  relations!: EntityTable<Relation, 'id'>;
+  tickets!: EntityTable<Ticket, 'id'>;
+  ticketLinks!: EntityTable<TicketLink, 'id'>;
 
   constructor() {
     super('world-building');
@@ -26,6 +41,29 @@ class WorldBuildingDatabase extends Dexie {
       novels: 'id, worldId, title, updatedAt',
       chapters: 'id, novelId, number, updatedAt',
       paragraphs: 'id, chapterId, [chapterId+order], updatedAt',
+    });
+    this.version(3).stores({
+      characters: 'id, worldId, lastName, updatedAt',
+    });
+    this.version(4).stores({
+      locations: 'id, worldId, updatedAt',
+    });
+    this.version(5).stores({
+      connections: 'id, worldId, fromId, toId, updatedAt',
+    });
+    this.version(6).stores({
+      calendars: 'id, worldId, updatedAt',
+    });
+    this.version(7).stores({
+      events: 'id, worldId, year, updatedAt',
+    });
+    this.version(8).stores({
+      ideas: 'id, worldId, createdAt, updatedAt',
+    });
+    this.version(9).stores({
+      relations: 'id, worldId, name, updatedAt',
+      tickets: 'id, worldId, relationId, updatedAt',
+      ticketLinks: 'id, worldId, relationId, updatedAt',
     });
   }
 }

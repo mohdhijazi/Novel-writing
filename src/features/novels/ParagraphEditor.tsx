@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { HoldToDelete } from '@/components/HoldToDelete';
+import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
+
 import styles from './ParagraphEditor.module.css';
 import { deleteParagraph, saveParagraphText } from './paragraphsRepository';
 import type { Paragraph } from './types';
@@ -25,7 +28,9 @@ export function ParagraphEditor({ paragraph }: { paragraph: Paragraph }) {
       return;
     }
     const timer = setTimeout(() => {
-      void saveParagraphText(paragraph.id, text);
+      void saveParagraphText(paragraph.id, text).then(() => {
+        requestSync(EDIT_SYNC_DELAY_MS);
+      });
     }, SAVE_DELAY_MS);
     return () => {
       clearTimeout(timer);
@@ -45,17 +50,17 @@ export function ParagraphEditor({ paragraph }: { paragraph: Paragraph }) {
         rows={1}
         aria-label="Paragraph"
       />
-      <button
-        type="button"
+      <HoldToDelete
         className={styles.delete}
-        onClick={() => {
-          void deleteParagraph(paragraph.id);
+        label="Delete paragraph"
+        onDelete={() => {
+          void deleteParagraph(paragraph.id).then(() => {
+            requestSync(EDIT_SYNC_DELAY_MS);
+          });
         }}
-        aria-label="Delete paragraph"
-        title="Delete paragraph"
       >
         ×
-      </button>
+      </HoldToDelete>
     </div>
   );
 }

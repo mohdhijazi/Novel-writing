@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Link, useParams } from 'react-router-dom';
 
 import { NameForm } from '@/components/NameForm';
+import { requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './NovelPage.module.css';
 import { createChapter, listChapters } from './chaptersRepository';
@@ -30,7 +31,9 @@ export function NovelPage() {
     if (novelId === undefined) {
       return;
     }
-    void createChapter(novelId, title);
+    void createChapter(novelId, title).then(() => {
+      requestSync();
+    });
   }
 
   return (

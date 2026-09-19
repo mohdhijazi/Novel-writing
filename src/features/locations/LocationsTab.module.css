@@ -1,0 +1,70 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.toolbar {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.add {
+  width: 2.25rem;
+  height: 2.25rem;
+  font: inherit;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Map and details sit side by side, stacking only when there is no room. */
+.content {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.viewport {
+  flex: 1 1 20rem;
+  min-width: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.map {
+  position: relative;
+  background-color: var(--color-bg);
+  /* Faint grid, so dragging has something to judge position against. */
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.side {
+  flex: 0 0 18rem;
+  position: sticky;
+  top: var(--space-3);
+}
+
+@media (width < 48rem) {
+  .content {
+    flex-wrap: wrap;
+  }
+
+  .side {
+    position: static;
+    flex: 1 1 100%;
+  }
+}
