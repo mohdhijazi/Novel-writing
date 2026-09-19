@@ -7,12 +7,12 @@ import { requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './NovelPage.module.css';
 import { createChapter, listChapters } from './chaptersRepository';
-import { exportNovelPdf } from './exportNovelPdf';
+import { ExportDialog } from './ExportDialog';
 import { getNovel } from './novelsRepository';
 
 export function NovelPage() {
   const { novelId } = useParams();
-  const [exportState, setExportState] = useState<'idle' | 'working' | 'failed'>('idle');
+  const [isExporting, setIsExporting] = useState(false);
   const novel = useLiveQuery(
     async () => (novelId === undefined ? null : await getNovel(novelId)),
     [novelId],
@@ -41,6 +41,16 @@ export function NovelPage() {
 
   return (
     <section className={styles.panel} aria-label={novel.title}>
+      {isExporting && chapters && (
+        <ExportDialog
+          novel={novel}
+          chapters={chapters}
+          onClose={() => {
+            setIsExporting(false);
+          }}
+        />
+      )}
+
       <div className={styles.header}>
         <Link to=".." relative="path" className={styles.back}>
           ← All novels
@@ -50,24 +60,14 @@ export function NovelPage() {
           <button
             type="button"
             className={styles.export}
-            disabled={exportState === 'working' || !chapters || chapters.length === 0}
+            disabled={!chapters || chapters.length === 0}
             onClick={() => {
-              setExportState('working');
-              exportNovelPdf(novel)
-                .then(() => {
-                  setExportState('idle');
-                })
-                .catch(() => {
-                  setExportState('failed');
-                });
+              setIsExporting(true);
             }}
           >
-            {exportState === 'working' ? 'Making the PDF…' : 'Export as PDF'}
+            Export as PDF
           </button>
         </div>
-        {exportState === 'failed' && (
-          <p className={styles.note}>The PDF could not be made. Try again.</p>
-        )}
       </div>
 
       <NameForm

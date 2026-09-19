@@ -79,8 +79,14 @@ missing `format` or world name stops the import. Imported files reference months
 
 `src/features/novels/exportNovelPdf.ts` matches a reference book the user supplied: A5 (419.53 ×
 595.28 pt), EB Garamond, justified body at 11/16 pt with an indented first line, centred chapter
-headings reading "Chapter I:" over the chapter title, page number bottom-right, one chapter per
-page, no running headers and no title page. Measurements live in `pdfLayout.ts`.
+headings reading "Chapter I:" over the chapter title, page number bottom-right and no running
+headers. The novel's title gets a page of its own, which carries no number, so the first chapter
+page reads "1". `ExportDialog` picks which chapters go in; chapters keep their own numbers whether
+or not their neighbours were included. Measurements live in `pdfLayout.ts`.
+
+A line is only stretched to the measure when it already fills most of it (`MIN_JUSTIFY_RATIO`), and
+a line break inside a paragraph starts a new indented paragraph. Without both, dialogue came out
+pulled apart across the page.
 
 The font is `public/fonts/EBGaramond.ttf` (the variable TTF from Google Fonts), fetched only when
 exporting and falling back to jsPDF's built-in Times when it cannot be fetched. It ships one weight,

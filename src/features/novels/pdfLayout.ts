@@ -29,6 +29,19 @@ export const HEADING = {
   topOffset: 48,
 };
 
+export const TITLE_PAGE = {
+  size: 24,
+  /** How far down the page the title sits, as a share of the page height. */
+  position: 0.38,
+};
+
+/**
+ * A line is only stretched to the full measure when it already fills most of
+ * it. Short lines — dialogue, a line break inside a paragraph — stay as they
+ * are rather than being pulled apart.
+ */
+export const MIN_JUSTIFY_RATIO = 0.75;
+
 export const PAGE_NUMBER = {
   size: 10,
   /** Baseline measured up from the bottom of the page. */
