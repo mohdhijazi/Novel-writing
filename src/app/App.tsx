@@ -11,6 +11,7 @@ import { NovelPage } from '@/features/novels/NovelPage';
 import { NovelsTab } from '@/features/novels/NovelsTab';
 import { RelationBoard } from '@/features/relations/RelationBoard';
 import { RelationsTab } from '@/features/relations/RelationsTab';
+import { SyncOfferDialog } from '@/features/sync/SyncOfferDialog';
 import { WorldPage } from '@/features/worlds/WorldPage';
 import { WorldTabPanel } from '@/features/worlds/WorldTabPanel';
 import { WorldsPage } from '@/features/worlds/WorldsPage';
@@ -19,6 +20,7 @@ import { DEFAULT_WORLD_TAB } from '@/features/worlds/worldTabs';
 export function App() {
   return (
     <DriveProvider>
+      <SyncOfferDialog />
       <HashRouter>
         <Routes>
           <Route path="/" element={<WorldsPage />} />

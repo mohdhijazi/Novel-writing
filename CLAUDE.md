@@ -61,6 +61,10 @@ My Drive/
 - Collection files are created when a world's folder is created. A world created by an older
   version keeps the files it had; there is no migration step yet.
 - Drive keeps 30 days of file revisions — that is the recovery path for a bad overwrite.
+- Work is always saved locally first; Drive is optional. `syncMeta` holds `lastSyncedAt`, and the
+  pending count is every record with `updatedAt` above it (each table indexes `updatedAt`, so this
+  is counted, never scanned). Reconnecting offers a sync instead of uploading silently; declining
+  pauses automatic syncs until the user presses Sync now.
 
 ## Importing a world
 

@@ -6,6 +6,7 @@ import type { WorldEvent } from '@/features/events/types';
 import type { Idea } from '@/features/ideas/types';
 import type { Connection, Location } from '@/features/locations/types';
 import type { Relation, Ticket, TicketLink } from '@/features/relations/types';
+import type { SyncMeta } from '@/features/sync/syncMeta';
 import type { Chapter, Novel, Paragraph } from '@/features/novels/types';
 import type { World } from '@/features/worlds/types';
 
@@ -30,6 +31,7 @@ class WorldBuildingDatabase extends Dexie {
   relations!: EntityTable<Relation, 'id'>;
   tickets!: EntityTable<Ticket, 'id'>;
   ticketLinks!: EntityTable<TicketLink, 'id'>;
+  syncMeta!: EntityTable<SyncMeta, 'id'>;
 
   constructor() {
     super('world-building');
@@ -64,6 +66,9 @@ class WorldBuildingDatabase extends Dexie {
       relations: 'id, worldId, name, updatedAt',
       tickets: 'id, worldId, relationId, updatedAt',
       ticketLinks: 'id, worldId, relationId, updatedAt',
+    });
+    this.version(10).stores({
+      syncMeta: 'id',
     });
   }
 }

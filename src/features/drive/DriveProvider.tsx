@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 
+import { offerSyncAfterConnect } from '@/features/sync/syncScheduler';
 import { connectDrive, disconnectDrive, getStoredAccessToken } from '@/lib/google/auth';
 
 import { DriveContext, type DriveConnection } from './driveContext';
@@ -15,6 +16,9 @@ export function DriveProvider({ children }: { children: ReactNode }) {
     connectDrive()
       .then(() => {
         setIsConnected(true);
+        // Work done while disconnected is offered for upload, never pushed
+        // silently; this also holds back the automatic sync until answered.
+        void offerSyncAfterConnect();
       })
       .catch((cause: unknown) => {
         setError(cause instanceof Error ? cause.message : 'Could not connect to Google Drive.');

@@ -4,6 +4,7 @@ import { NameForm } from '@/components/NameForm';
 import { DriveStatus } from '@/features/drive/DriveStatus';
 import { ImportPanel } from '@/features/import/ImportPanel';
 import { useDrive } from '@/features/drive/driveContext';
+import { SyncStatus } from '@/features/sync/SyncStatus';
 import { requestSync } from '@/features/sync/syncScheduler';
 import { useSync } from '@/features/sync/useSync';
 
@@ -31,6 +32,7 @@ export function WorldsPage() {
       <header className={styles.header}>
         <h1 className={styles.heading}>Worlds</h1>
         <DriveStatus />
+        <SyncStatus />
       </header>
 
       <NameForm

@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
 
 import { useDrive } from '@/features/drive/driveContext';
+import { SyncStatus } from '@/features/sync/SyncStatus';
 import { useSync } from '@/features/sync/useSync';
 
 import styles from './WorldPage.module.css';
@@ -12,7 +13,8 @@ import { getWorld } from './worldsRepository';
 export function WorldPage() {
   const { worldId } = useParams();
   const { isConnected } = useDrive();
-  const { isSyncing, error } = useSync(isConnected);
+  // Keeps the automatic syncs running while a world is open; SyncStatus renders the state.
+  useSync(isConnected);
   const world = useLiveQuery(
     async () => (worldId === undefined ? null : await getWorld(worldId)),
     [worldId],
@@ -54,8 +56,7 @@ export function WorldPage() {
         ))}
       </nav>
 
-      {isSyncing && <p className={styles.note}>Syncing with Google Drive…</p>}
-      {error !== null && <p className={styles.error}>{error}</p>}
+      <SyncStatus />
 
       <Outlet />
     </main>
