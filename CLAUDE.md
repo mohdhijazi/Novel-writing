@@ -75,6 +75,18 @@ forgiving: unknown keys are ignored, a record missing its name is skipped with a
 missing `format` or world name stops the import. Imported files reference months and locations by
 **name**; ids are resolved during the import.
 
+## Exporting a novel as PDF
+
+`src/features/novels/exportNovelPdf.ts` matches a reference book the user supplied: A5 (419.53 ×
+595.28 pt), EB Garamond, justified body at 11/16 pt with an indented first line, centred chapter
+headings reading "Chapter I:" over the chapter title, page number bottom-right, one chapter per
+page, no running headers and no title page. Measurements live in `pdfLayout.ts`.
+
+The font is `public/fonts/EBGaramond.ttf` (the variable TTF from Google Fonts), fetched only when
+exporting and falling back to jsPDF's built-in Times when it cannot be fetched. It ships one weight,
+so headings are stroked slightly to carry the reference's bold. jsPDF is imported dynamically — it
+is larger than the rest of the app.
+
 ## Commands
 
 - `npm run dev` — dev server at http://localhost:5173/Novel-writing/ (service worker disabled)
