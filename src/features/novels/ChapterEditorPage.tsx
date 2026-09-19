@@ -12,9 +12,14 @@ import { appendParagraph, listParagraphs } from './paragraphsRepository';
 export function ChapterEditorPage() {
   const { chapterId } = useParams();
   /**
-   * Which paragraphs are open. Null means the default — everything folded away
-   * except the one being written — so the list needs no correcting as
-   * paragraphs load, arrive or go.
+   * Everything before the last paragraph is folded behind one line by default,
+   * so a long chapter opens where the writing is rather than at the top.
+   */
+  const [showEarlier, setShowEarlier] = useState(false);
+  /**
+   * Which paragraphs are open once they are on screen. Null means the default —
+   * only the last one — so the list needs no correcting as paragraphs load,
+   * arrive or go.
    */
   const [openIds, setOpenIds] = useState<Set<string> | null>(null);
 
@@ -39,7 +44,9 @@ export function ChapterEditorPage() {
   const lastId = list.at(-1)?.id;
   const defaultOpen = new Set(lastId === undefined ? [] : [lastId]);
   const open = openIds ?? defaultOpen;
-  const openCount = list.filter((paragraph) => open.has(paragraph.id)).length;
+  const earlierCount = Math.max(list.length - 1, 0);
+  const onScreen = showEarlier ? list : list.slice(-1);
+  const openCount = onScreen.filter((paragraph) => open.has(paragraph.id)).length;
 
   function toggle(id: string) {
     setOpenIds((current) => {
@@ -77,25 +84,27 @@ export function ChapterEditorPage() {
         </h2>
       </div>
 
-      {list.length > 1 && (
+      {earlierCount > 0 && (
         <div className={styles.toolbar}>
           <button
             type="button"
             className={styles.toolbarButton}
-            disabled={openCount === list.length}
             onClick={() => {
+              setShowEarlier(true);
               setOpenIds(new Set(list.map((paragraph) => paragraph.id)));
             }}
+            disabled={showEarlier && openCount === list.length}
           >
             Expand all
           </button>
           <button
             type="button"
             className={styles.toolbarButton}
-            disabled={openCount === 0}
             onClick={() => {
+              setShowEarlier(false);
               setOpenIds(new Set());
             }}
+            disabled={!showEarlier && openCount === 0}
           >
             Collapse all
           </button>
@@ -105,12 +114,28 @@ export function ChapterEditorPage() {
         </div>
       )}
 
+      {earlierCount > 0 && (
+        <button
+          type="button"
+          className={styles.earlier}
+          aria-expanded={showEarlier}
+          onClick={() => {
+            setShowEarlier(!showEarlier);
+          }}
+        >
+          <span aria-hidden="true">{showEarlier ? '▾' : '▸'}</span>
+          {showEarlier
+            ? 'Fold the earlier paragraphs away'
+            : `${String(earlierCount)} earlier paragraph${earlierCount === 1 ? '' : 's'}`}
+        </button>
+      )}
+
       <div className={styles.paragraphs}>
-        {list.map((paragraph, index) => (
+        {onScreen.map((paragraph) => (
           <ParagraphEditor
             key={paragraph.id}
             paragraph={paragraph}
-            position={index + 1}
+            position={list.indexOf(paragraph) + 1}
             isOpen={open.has(paragraph.id)}
             onToggle={() => {
               toggle(paragraph.id);
