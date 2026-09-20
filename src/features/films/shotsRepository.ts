@@ -38,6 +38,22 @@ export async function createShot(worldId: string, sceneId: string): Promise<Shot
   return shot;
 }
 
+/** Adds shots from pasted JSON, numbered in the order they arrived. */
+export async function addImportedShots(
+  worldId: string,
+  sceneId: string,
+  shots: Pick<Shot, 'shotType' | 'visual' | 'camera'>[],
+): Promise<Shot[]> {
+  const added: Shot[] = [];
+  for (const fields of shots) {
+    const shot = await createShot(worldId, sceneId);
+    const filled = { ...shot, ...fields };
+    await db.shots.put(filled);
+    added.push(filled);
+  }
+  return added;
+}
+
 export async function saveShotField(id: string, field: ShotField, value: string): Promise<void> {
   await db.shots.update(id, { [field]: value, updatedAt: new Date().toISOString() });
 }

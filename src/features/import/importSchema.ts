@@ -1,3 +1,5 @@
+import { asArray, asRecord, asString, asWholeNumber } from '@/lib/json/readValues';
+
 /**
  * The shape of a world import file. It is written by someone else's AI from a
  * story or notes, so parsing is forgiving: unknown keys are ignored, every
@@ -52,31 +54,6 @@ export interface ParseResult {
   errors: string[];
   /** Records skipped or repaired; the rest of the import still runs. */
   warnings: string[];
-}
-
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function asString(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function asArray(value: unknown): unknown[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function asWholeNumber(value: unknown): number | null {
-  if (typeof value === 'number' && Number.isInteger(value)) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    const parsed = Number.parseInt(value.trim(), 10);
-    return Number.isInteger(parsed) ? parsed : null;
-  }
-  return null;
 }
 
 function parseCharacters(value: unknown, warnings: string[]): ImportedCharacter[] {

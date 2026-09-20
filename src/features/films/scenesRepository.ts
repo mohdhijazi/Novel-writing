@@ -59,6 +59,18 @@ function pad(value: number): string {
   return String(value).padStart(2, '0');
 }
 
+/** Adds a scene from pasted JSON, with whatever fields it carried. */
+export async function addImportedScene(
+  worldId: string,
+  episodeId: string,
+  fields: Partial<Record<SceneTextField, string>>,
+): Promise<Scene> {
+  const scene = await createScene(worldId, episodeId, fields.title ?? '');
+  const filled = { ...scene, ...fields };
+  await db.scenes.put(filled);
+  return filled;
+}
+
 export async function saveSceneField(
   id: string,
   field: SceneTextField,

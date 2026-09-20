@@ -128,6 +128,14 @@ Descriptive narration is left out; the visuals carry it.
 - Shots were called beats until database version 14, which renamed the table and re-parented every
   line from its scene to the shot its old `beatNumber` pointed at. Version 15 drops the old table.
   A world synced before that still has an orphan `beats.json` in Drive; nothing reads it.
+- **Add from JSON**, on the episode's scene list, writes a whole scene at once: `sceneImportPrompt.ts`
+  builds the prompt from the same field labels the form uses and from `SHOT_TYPES`, so it cannot
+  drift from the app, and `sceneImportSchema.ts` reads the answer. Reading is forgiving in the way
+  the world import is — unknown keys ignored, every field optional — and more so besides: the
+  `format` wrapper and the `scene` wrapper are both optional, INT./EXT. is recognised however it was
+  written, and a shot type the app does not know is kept as written. Pictures are never in the JSON;
+  they are chosen in the app. The dialog stays open after writing to say what it added and what it
+  skipped, because a warning nobody sees is no warning at all.
 - **Export as PDF** on a scene writes a working sheet: A4, Helvetica, one section per part of the
   template, the beat's pictures printed under it, and page numbers only when it runs to more than one
   page. Empty fields print nothing at all — a sheet full of blank labels is worse than a short one.
@@ -137,7 +145,9 @@ Descriptive narration is left out; the visuals carry it.
 
 ## Importing a world
 
-`src/features/import/` turns a file written by someone else's AI into a new world. The prompt handed
+`src/features/import/` turns a file written by someone else's AI into a new world. (A single scene
+comes in the same way, through the Films tab — see Scenes.) The helpers that read untrusted JSON
+without throwing live in `lib/json/readValues`, shared by both. The prompt handed
 to that AI is built from `CHARACTER_FIELD_GROUPS`, so adding a character field updates the prompt
 automatically — keep it that way rather than restating the fields by hand. Parsing is deliberately
 forgiving: unknown keys are ignored, a record missing its name is skipped with a warning, and only a

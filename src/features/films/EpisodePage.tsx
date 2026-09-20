@@ -1,16 +1,20 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { HoldToDelete } from '@/components/HoldToDelete';
 import { NameForm } from '@/components/NameForm';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './EpisodePage.module.css';
+import { SceneImportDialog } from './SceneImportDialog';
 import { getEpisode } from './episodesRepository';
 import { createScene, deleteScene, listScenes } from './scenesRepository';
 
 export function EpisodePage() {
   const { worldId, episodeId } = useParams();
+  const navigate = useNavigate();
+  const [isPasting, setIsPasting] = useState(false);
   const episode = useLiveQuery(
     async () => (episodeId === undefined ? null : await getEpisode(episodeId)),
     [episodeId],
@@ -49,7 +53,32 @@ export function EpisodePage() {
         </h2>
       </div>
 
-      <NameForm label="Scene title" submitLabel="Add scene" onSubmit={handleCreate} />
+      <div className={styles.add}>
+        <NameForm label="Scene title" submitLabel="Add scene" onSubmit={handleCreate} />
+        <button
+          type="button"
+          className={styles.fromJson}
+          onClick={() => {
+            setIsPasting(true);
+          }}
+        >
+          Add from JSON
+        </button>
+      </div>
+
+      {isPasting && worldId !== undefined && episodeId !== undefined && (
+        <SceneImportDialog
+          worldId={worldId}
+          episodeId={episodeId}
+          onClose={() => {
+            setIsPasting(false);
+          }}
+          onAdded={(sceneId) => {
+            setIsPasting(false);
+            void navigate(`scenes/${sceneId}`);
+          }}
+        />
+      )}
 
       {scenes && scenes.length > 0 ? (
         <ol className={styles.list}>

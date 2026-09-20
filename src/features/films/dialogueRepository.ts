@@ -36,6 +36,18 @@ export async function createDialogueLine(worldId: string, shotId: string): Promi
   return line;
 }
 
+/** Adds lines from pasted JSON, in the order they arrived. */
+export async function addImportedDialogue(
+  worldId: string,
+  shotId: string,
+  lines: Pick<DialogueLine, 'speaker' | 'line' | 'delivery'>[],
+): Promise<void> {
+  for (const fields of lines) {
+    const created = await createDialogueLine(worldId, shotId);
+    await db.dialogueLines.put({ ...created, ...fields });
+  }
+}
+
 export async function saveDialogueField(
   id: string,
   field: DialogueField,

@@ -35,6 +35,30 @@
   color: var(--color-text-muted);
 }
 
+/* The two ways to add a scene, side by side when there is room. */
+.add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.fromJson {
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  background: none;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.fromJson:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 .list {
   display: flex;
   flex-direction: column;
