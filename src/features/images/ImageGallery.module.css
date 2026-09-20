@@ -1,0 +1,57 @@
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.count {
+  color: var(--color-accent);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.choose {
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  background: none;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.choose:hover:enabled {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.choose:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+/* The real input is driven by the button beside it. */
+.input {
+  display: none;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}

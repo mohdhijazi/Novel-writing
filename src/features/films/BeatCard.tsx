@@ -1,5 +1,6 @@
 import { AutosaveField } from '@/components/AutosaveField';
 import { HoldToDelete } from '@/components/HoldToDelete';
+import { ImageGallery } from '@/features/images/ImageGallery';
 import { SelectField } from '@/components/SelectField';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
@@ -45,6 +46,8 @@ export function BeatCard({ beat }: { beat: Beat }) {
           save('visual', value);
         }}
       />
+
+      <ImageGallery worldId={beat.worldId} ownerId={beat.id} label="Images" />
 
       <HoldToDelete
         className={styles.delete}

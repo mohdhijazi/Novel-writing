@@ -1,3 +1,4 @@
+import { deleteOwnerImages } from '@/features/images/imagesRepository';
 import { db } from '@/lib/db/database';
 import { mergeByUpdatedAt } from '@/lib/storage/mergeRecords';
 
@@ -42,7 +43,9 @@ export async function saveBeatField(id: string, field: BeatField, value: string)
 
 export async function deleteBeat(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
-  await db.beats.update(id, { deletedAt: timestamp, updatedAt: timestamp });
+  await db.transaction('rw', db.beats, db.images, async () => {
+    await removeBeat(id, timestamp);
+  });
 }
 
 /** Removes every beat of a scene, as part of deleting the scene itself. */
@@ -50,9 +53,15 @@ export async function deleteBeatsOfScene(sceneId: string, timestamp: string): Pr
   const beats = await db.beats.where('sceneId').equals(sceneId).toArray();
   for (const beat of beats) {
     if (beat.deletedAt === null) {
-      await db.beats.update(beat.id, { deletedAt: timestamp, updatedAt: timestamp });
+      await removeBeat(beat.id, timestamp);
     }
   }
+}
+
+async function removeBeat(id: string, timestamp: string): Promise<void> {
+  await db.beats.update(id, { deletedAt: timestamp, updatedAt: timestamp });
+  // Its pictures go too, so their files do not stay behind in Drive.
+  await deleteOwnerImages(id);
 }
 
 /** Applies the beats from Drive; returns whether the local side holds more. */

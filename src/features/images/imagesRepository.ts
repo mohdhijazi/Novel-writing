@@ -23,14 +23,16 @@ export async function getOwnerImage(ownerId: string): Promise<WorldImage | null>
   );
 }
 
-/** Gives the owner a picture, replacing whichever it had. */
-export async function setOwnerImage(
-  worldId: string,
-  ownerId: string,
-  blob: Blob,
-): Promise<WorldImage> {
-  const timestamp = new Date().toISOString();
-  const image: WorldImage = {
+/** Every picture of an owner, oldest first — a beat keeps as many as it needs. */
+export async function listOwnerImages(ownerId: string): Promise<WorldImage[]> {
+  const images = await db.images.where('ownerId').equals(ownerId).toArray();
+  return images
+    .filter((image) => image.deletedAt === null)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+function newImage(worldId: string, ownerId: string, blob: Blob, timestamp: string): WorldImage {
+  return {
     id: crypto.randomUUID(),
     worldId,
     ownerId,
@@ -40,6 +42,16 @@ export async function setOwnerImage(
     updatedAt: timestamp,
     deletedAt: null,
   };
+}
+
+/** Gives the owner a picture, replacing whichever it had. */
+export async function setOwnerImage(
+  worldId: string,
+  ownerId: string,
+  blob: Blob,
+): Promise<WorldImage> {
+  const timestamp = new Date().toISOString();
+  const image = newImage(worldId, ownerId, blob, timestamp);
   // One transaction, so a picture is never both replaced and lost.
   await db.transaction('rw', db.images, async () => {
     await removeOwnerImages(ownerId, timestamp);
@@ -48,10 +60,28 @@ export async function setOwnerImage(
   return image;
 }
 
+/** Adds a picture alongside the ones the owner already has. */
+export async function addOwnerImage(
+  worldId: string,
+  ownerId: string,
+  blob: Blob,
+): Promise<WorldImage> {
+  const image = newImage(worldId, ownerId, blob, new Date().toISOString());
+  await db.images.add(image);
+  return image;
+}
+
+/** Takes one picture away, leaving the owner's others alone. */
+export async function deleteImage(id: string): Promise<void> {
+  const timestamp = new Date().toISOString();
+  // The bytes go now; the record stays until sync bins the Drive file.
+  await db.images.update(id, { deletedAt: timestamp, updatedAt: timestamp, blob: null });
+}
+
 /**
- * Removes every picture of an owner — called when the picture is taken away,
- * and when the character or location itself is deleted, so its bytes do not
- * stay behind in Drive.
+ * Removes every picture of an owner — called when a single picture is taken
+ * away, and when the character, location or beat itself is deleted, so its
+ * bytes do not stay behind in Drive.
  */
 export async function deleteOwnerImages(ownerId: string): Promise<void> {
   await removeOwnerImages(ownerId, new Date().toISOString());

@@ -71,7 +71,7 @@ export async function saveSceneField(
 export async function deleteScene(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
   // One transaction, so a scene never goes without its beats and dialogue.
-  await db.transaction('rw', db.scenes, db.beats, db.dialogueLines, async () => {
+  await db.transaction('rw', db.scenes, db.beats, db.dialogueLines, db.images, async () => {
     await removeScene(id, timestamp);
   });
 }

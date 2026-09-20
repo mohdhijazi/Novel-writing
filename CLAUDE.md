@@ -81,9 +81,11 @@ My Drive/
 
 ## Pictures
 
-A character or a location can have one picture, added through `ImageField` in `src/features/images/`
-— a shared feature, the way `lib/map/` is shared: both features use its field, and everything about
-pictures lives there.
+Pictures live in `src/features/images/` — a shared feature, the way `lib/map/` is shared:
+everything about them is there, and other features use its two components. A character or a location
+has **one** picture (`ImageField`); a shot beat has **as many as it needs** (`ImageGallery`, which
+takes several files at once). Both store pictures the same way, through `useAddImages`; they differ
+only in whether a new picture replaces the last one.
 
 - The file the user picks is scaled to fit 1400 px and re-encoded as JPEG (`lib/images/prepareImage`)
   before it is stored. A phone photo is several megabytes; it would otherwise cost that in IndexedDB,
@@ -98,7 +100,8 @@ pictures lives there.
 - Fetching bytes does not touch `updatedAt`: the record did not change, and bumping it would send an
   unchanged file back to Drive.
 - Removing a picture bins its Drive file and clears `driveFileId`, so it is binned once; deleting a
-  character or location removes its picture too, so no file is left behind in Drive.
+  character, location or beat removes its pictures too, so no file is left behind in Drive. Every
+  transaction that can reach a beat — scene, episode, film — therefore touches `images` as well.
 - A device that has the record but not the bytes says so and waits for a sync — pictures are as
   offline-friendly as everything else, but they cannot appear out of nothing.
 

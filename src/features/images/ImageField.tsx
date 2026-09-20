@@ -1,12 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import { HoldToDelete } from '@/components/HoldToDelete';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
-import { ImageRejected, prepareImage } from '@/lib/images/prepareImage';
 
 import styles from './ImageField.module.css';
 import { deleteOwnerImages, getOwnerImage, setOwnerImage } from './imagesRepository';
+import { useAddImages } from './useAddImages';
 import { useImageUrl } from './useImageUrl';
 
 interface ImageFieldProps {
@@ -19,36 +19,15 @@ interface ImageFieldProps {
 
 /**
  * The one picture a character or location can have: choose it, replace it, or
- * hold to remove it. Shared by both features — the record, the file in Drive
- * and the button all live here.
+ * hold to remove it. A beat keeps several instead — see `ImageGallery`.
  */
 export function ImageField({ worldId, ownerId, label }: ImageFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isWorking, setIsWorking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const image = useLiveQuery(async () => getOwnerImage(ownerId), [ownerId]);
   const url = useImageUrl(image?.blob ?? null);
-
-  function choose(file: File | undefined) {
-    if (file === undefined) {
-      return;
-    }
-    setIsWorking(true);
-    setError(null);
-    void prepareImage(file)
-      .then(async (blob) => setOwnerImage(worldId, ownerId, blob))
-      .then(() => {
-        setIsWorking(false);
-        requestSync(EDIT_SYNC_DELAY_MS);
-      })
-      .catch((cause: unknown) => {
-        setIsWorking(false);
-        setError(
-          cause instanceof ImageRejected ? cause.message : 'That picture could not be saved.',
-        );
-      });
-  }
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { take, isWorking, error } = useAddImages(async (blob) =>
+    setOwnerImage(worldId, ownerId, blob),
+  );
 
   return (
     <div className={styles.field}>
@@ -92,9 +71,7 @@ export function ImageField({ worldId, ownerId, label }: ImageFieldProps) {
         accept="image/*"
         aria-label={`Choose a picture — ${label}`}
         onChange={(event) => {
-          choose(event.target.files?.[0]);
-          // Cleared so choosing the same file again still counts as a change.
-          event.target.value = '';
+          take(event.target);
         }}
       />
 

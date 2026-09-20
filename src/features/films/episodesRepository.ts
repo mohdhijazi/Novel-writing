@@ -46,9 +46,17 @@ export async function createEpisode(
 export async function deleteEpisode(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
   // One transaction, so an episode never goes without its scenes.
-  await db.transaction('rw', db.episodes, db.scenes, db.beats, db.dialogueLines, async () => {
-    await removeEpisode(id, timestamp);
-  });
+  await db.transaction(
+    'rw',
+    db.episodes,
+    db.scenes,
+    db.beats,
+    db.dialogueLines,
+    db.images,
+    async () => {
+      await removeEpisode(id, timestamp);
+    },
+  );
 }
 
 /** Removes every episode of a film, as part of deleting the film itself. */
