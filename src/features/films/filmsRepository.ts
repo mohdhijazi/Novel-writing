@@ -38,10 +38,18 @@ export async function createFilm(worldId: string, title: string): Promise<Film> 
 export async function deleteFilm(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
   // One transaction, so a film never goes without its episodes and scenes.
-  await db.transaction('rw', db.films, db.episodes, db.scenes, async () => {
-    await db.films.update(id, { deletedAt: timestamp, updatedAt: timestamp });
-    await deleteEpisodesOfFilm(id, timestamp);
-  });
+  await db.transaction(
+    'rw',
+    db.films,
+    db.episodes,
+    db.scenes,
+    db.beats,
+    db.dialogueLines,
+    async () => {
+      await db.films.update(id, { deletedAt: timestamp, updatedAt: timestamp });
+      await deleteEpisodesOfFilm(id, timestamp);
+    },
+  );
 }
 
 /** Applies the films from Drive; returns whether the local side holds more. */

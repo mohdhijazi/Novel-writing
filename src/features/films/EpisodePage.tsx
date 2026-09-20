@@ -60,10 +60,11 @@ export function EpisodePage() {
         <ol className={styles.list}>
           {scenes.map((scene) => (
             <li key={scene.id} className={styles.row}>
-              <div className={styles.item}>
+              <Link to={`scenes/${scene.id}`} className={styles.item}>
                 <span className={styles.number}>{scene.number}</span>
-                <span>{scene.title}</span>
-              </div>
+                <span className={styles.title}>{scene.title}</span>
+                {scene.sceneCode !== '' && <span className={styles.code}>{scene.sceneCode}</span>}
+              </Link>
               <HoldToDelete
                 className={styles.delete}
                 label={`Delete scene ${scene.title}`}

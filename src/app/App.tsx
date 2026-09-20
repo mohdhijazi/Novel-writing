@@ -6,6 +6,7 @@ import { EpisodePage } from '@/features/films/EpisodePage';
 import { EventsTab } from '@/features/events/EventsTab';
 import { FilmPage } from '@/features/films/FilmPage';
 import { FilmsTab } from '@/features/films/FilmsTab';
+import { ScenePage } from '@/features/films/ScenePage';
 import { IdeasTab } from '@/features/ideas/IdeasTab';
 import { DriveProvider } from '@/features/drive/DriveProvider';
 import { LocationsTab } from '@/features/locations/LocationsTab';
@@ -42,6 +43,10 @@ export function App() {
             <Route path="novels/:novelId/chapters/:chapterId" element={<ChapterEditorPage />} />
             <Route path="films/:filmId" element={<FilmPage />} />
             <Route path="films/:filmId/episodes/:episodeId" element={<EpisodePage />} />
+            <Route
+              path="films/:filmId/episodes/:episodeId/scenes/:sceneId"
+              element={<ScenePage />}
+            />
             <Route path=":tabSlug" element={<WorldTabPanel />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

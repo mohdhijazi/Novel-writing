@@ -36,6 +36,8 @@ My Drive/
       films.json              films and series set in the world
       episodes.json           each names the film it belongs to
       scenes.json             each names the episode it belongs to
+      beats.json              the shots a scene is broken into
+      dialogueLines.json      what is said in a scene, and over which beat
       images.json             which picture belongs to which character or location
       Images/                 the pictures themselves, one file each
         <image id>.jpg
@@ -99,6 +101,26 @@ pictures lives there.
   character or location removes its picture too, so no file is left behind in Drive.
 - A device that has the record but not the bytes says so and waits for a sync — pictures are as
   offline-friendly as everything else, but they cannot appear out of nothing.
+
+## Scenes
+
+A scene follows the user's scene writing template, the step that turns chapter prose into something
+an image and video generator can work from. The rule the template sets, and the reason the labels
+read as they do: **every field describes what a camera or a generated image would show** — visible
+movement, not feeling or intent ("his hand tightens around the cup", never "he feels anxious").
+Descriptive narration is left out; the visuals carry it.
+
+- The scene's own fields are listed in `sceneFields.ts`, which drives the form the way
+  `characterFields.ts` drives the character one. Adding a field is an entry there plus the type;
+  `syncFilms.ts` takes the fields from `SCENE_TEXT_FIELDS`, so a new one syncs without being named
+  again.
+- A scene carries a **Scene ID** for tracking across the pipeline (`Ep01_Ch2_Sc3`). A new scene gets
+  `Ep<episode>_Sc<scene>` as a first guess; the chapter it came from is the writer's to add.
+- **Beats** are records of their own, because a generated clip runs about five seconds: a scene is a
+  handful of short beats, each one image. **Dialogue lines** are records too, and name the beat they
+  play over — they are the source for the dub and the subtitles later on.
+- Deleting a scene tombstones its beats and its lines in the same transaction.
+- Still to come from the user: more of what a scene holds.
 
 ## Importing a world
 
