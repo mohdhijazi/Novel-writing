@@ -8,7 +8,7 @@ import { useAddImages } from './useAddImages';
 
 interface ImageGalleryProps {
   worldId: string;
-  /** What the pictures belong to — a shot beat. */
+  /** What the pictures belong to — a shot. */
   ownerId: string;
   /** What the pictures are, e.g. "Images". */
   label: string;

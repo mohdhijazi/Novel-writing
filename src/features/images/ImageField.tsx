@@ -19,7 +19,7 @@ interface ImageFieldProps {
 
 /**
  * The one picture a character or location can have: choose it, replace it, or
- * hold to remove it. A beat keeps several instead — see `ImageGallery`.
+ * hold to remove it. A shot keeps several instead — see `ImageGallery`.
  */
 export function ImageField({ worldId, ownerId, label }: ImageFieldProps) {
   const image = useLiveQuery(async () => getOwnerImage(ownerId), [ownerId]);

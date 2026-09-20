@@ -3,7 +3,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { WorldCalendar } from '@/features/calendar/types';
 import type { Character } from '@/features/characters/types';
 import type { WorldEvent } from '@/features/events/types';
-import type { Beat, DialogueLine, Episode, Film, Scene } from '@/features/films/types';
+import type { DialogueLine, Episode, Film, Scene, Shot } from '@/features/films/types';
 import type { Idea } from '@/features/ideas/types';
 import type { WorldImage } from '@/features/images/types';
 import type { Connection, Location } from '@/features/locations/types';
@@ -11,6 +11,19 @@ import type { Relation, Ticket, TicketLink } from '@/features/relations/types';
 import type { SyncMeta } from '@/features/sync/syncMeta';
 import type { Chapter, Novel, Paragraph } from '@/features/novels/types';
 import type { World } from '@/features/worlds/types';
+import type { StoredRecord } from '@/lib/storage/collectionFile';
+
+/** A dialogue line as version 13 stored it: tied to a scene and a beat number. */
+interface OldDialogueLine extends StoredRecord {
+  worldId: string;
+  sceneId: string;
+  order: number;
+  speaker: string;
+  line: string;
+  delivery: string;
+  beatNumber: number;
+  createdAt: string;
+}
 
 /**
  * The local database — the source of truth on each device; Drive is a copy.
@@ -37,7 +50,7 @@ class WorldBuildingDatabase extends Dexie {
   films!: EntityTable<Film, 'id'>;
   episodes!: EntityTable<Episode, 'id'>;
   scenes!: EntityTable<Scene, 'id'>;
-  beats!: EntityTable<Beat, 'id'>;
+  shots!: EntityTable<Shot, 'id'>;
   dialogueLines!: EntityTable<DialogueLine, 'id'>;
   syncMeta!: EntityTable<SyncMeta, 'id'>;
 
@@ -90,6 +103,64 @@ class WorldBuildingDatabase extends Dexie {
       beats: 'id, worldId, sceneId, number, updatedAt',
       dialogueLines: 'id, worldId, sceneId, order, updatedAt',
     });
+    // Beats became shots, and a line of dialogue now belongs to the shot it is
+    // said over rather than to the scene. Two versions: the records move while
+    // the old table is still there, and only then is it dropped.
+    this.version(14)
+      .stores({
+        shots: 'id, worldId, sceneId, number, updatedAt',
+        dialogueLines: 'id, worldId, shotId, order, updatedAt',
+      })
+      .upgrade(async (tx) => {
+        const timestamp = new Date().toISOString();
+        const shots = tx.table<Shot>('shots');
+        // A beat had exactly a shot's shape, so they are read as shots.
+        const beats = await tx.table<Shot>('beats').toArray();
+        await shots.bulkAdd(beats.map((beat) => ({ ...beat, updatedAt: timestamp })));
+
+        const byScene = new Map<string, Shot[]>();
+        for (const beat of beats) {
+          byScene.set(beat.sceneId, [...(byScene.get(beat.sceneId) ?? []), beat]);
+        }
+
+        const oldLines = await tx.table<OldDialogueLine>('dialogueLines').toArray();
+        const lines = tx.table<DialogueLine>('dialogueLines');
+        for (const old of oldLines) {
+          const inScene = [...(byScene.get(old.sceneId) ?? [])].sort((a, b) => a.number - b.number);
+          let shot = inScene.find((candidate) => candidate.number === old.beatNumber) ?? inScene[0];
+          if (shot === undefined) {
+            // A line written before its scene had a shot still has to be said
+            // over something, so it is given one rather than dropped.
+            shot = {
+              id: crypto.randomUUID(),
+              worldId: old.worldId,
+              sceneId: old.sceneId,
+              number: 1,
+              shotType: '',
+              visual: '',
+              camera: '',
+              createdAt: timestamp,
+              updatedAt: timestamp,
+              deletedAt: null,
+            };
+            await shots.add(shot);
+            byScene.set(old.sceneId, [shot]);
+          }
+          await lines.put({
+            id: old.id,
+            worldId: old.worldId,
+            shotId: shot.id,
+            order: old.order,
+            speaker: old.speaker,
+            line: old.line,
+            delivery: old.delivery,
+            createdAt: old.createdAt,
+            updatedAt: timestamp,
+            deletedAt: old.deletedAt,
+          });
+        }
+      });
+    this.version(15).stores({ beats: null });
   }
 }
 

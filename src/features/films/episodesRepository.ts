@@ -50,7 +50,7 @@ export async function deleteEpisode(id: string): Promise<void> {
     'rw',
     db.episodes,
     db.scenes,
-    db.beats,
+    db.shots,
     db.dialogueLines,
     db.images,
     async () => {

@@ -36,8 +36,8 @@ My Drive/
       films.json              films and series set in the world
       episodes.json           each names the film it belongs to
       scenes.json             each names the episode it belongs to
-      beats.json              the shots a scene is broken into
-      dialogueLines.json      what is said in a scene, and over which beat
+      shots.json              the shots a scene is broken into
+      dialogueLines.json      what is said, each line naming the shot it plays over
       images.json             which picture belongs to which character or location
       Images/                 the pictures themselves, one file each
         <image id>.jpg
@@ -119,10 +119,15 @@ Descriptive narration is left out; the visuals carry it.
   again.
 - A scene carries a **Scene ID** for tracking across the pipeline (`Ep01_Ch2_Sc3`). A new scene gets
   `Ep<episode>_Sc<scene>` as a first guess; the chapter it came from is the writer's to add.
-- **Beats** are records of their own, because a generated clip runs about five seconds: a scene is a
-  handful of short beats, each one image. **Dialogue lines** are records too, and name the beat they
-  play over — they are the source for the dub and the subtitles later on.
-- Deleting a scene tombstones its beats and its lines in the same transaction.
+- **Shots** are records of their own, because a generated clip runs about five seconds: a scene is a
+  handful of short shots, each one image. **Dialogue lines** belong to a shot, not to the scene —
+  a line is said over one image, and the pipeline needs to know which. They are the source for the
+  dub and the subtitles later on.
+- Deleting a scene tombstones its shots, and a shot takes its lines and its pictures with it, all in
+  one transaction.
+- Shots were called beats until database version 14, which renamed the table and re-parented every
+  line from its scene to the shot its old `beatNumber` pointed at. Version 15 drops the old table.
+  A world synced before that still has an orphan `beats.json` in Drive; nothing reads it.
 - **Export as PDF** on a scene writes a working sheet: A4, Helvetica, one section per part of the
   template, the beat's pictures printed under it, and page numbers only when it runs to more than one
   page. Empty fields print nothing at all — a sheet full of blank labels is worse than a short one.

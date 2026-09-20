@@ -1,9 +1,9 @@
 import type { StoredRecord } from '@/lib/storage/collectionFile';
 
 /**
- * Film, episode, scene, and a scene's beats and dialogue are flat collections
- * rather than nested folders, the way relations, tickets and links are: each
- * record names its parent, so one file per kind syncs the whole hierarchy.
+ * Film, episode, scene, shot and dialogue are flat collections rather than
+ * nested folders, the way relations, tickets and links are: each record names
+ * its parent, so one file per kind syncs the whole hierarchy.
  */
 
 /** A film or series set in a world. */
@@ -24,8 +24,8 @@ export interface Episode extends StoredRecord {
 
 /**
  * A scene, written the way the scene template asks for: everything is what a
- * camera would see, not what anyone feels or means. Its shot beats and its
- * dialogue are records of their own.
+ * camera would see, not what anyone feels or means. Its shots are records of
+ * their own, and each line of dialogue belongs to the shot it plays over.
  */
 export interface Scene extends StoredRecord {
   worldId: string;
@@ -53,10 +53,10 @@ export interface Scene extends StoredRecord {
 }
 
 /** One image the scene is built from — a clip is short, so a scene is many. */
-export interface Beat extends StoredRecord {
+export interface Shot extends StoredRecord {
   worldId: string;
   sceneId: string;
-  /** Position within the scene; dialogue refers to it by this number. */
+  /** Position within the scene. */
   number: number;
   shotType: string;
   visual: string;
@@ -64,24 +64,23 @@ export interface Beat extends StoredRecord {
   createdAt: string;
 }
 
+/** A line said during one shot. It belongs to that shot, not to the scene. */
 export interface DialogueLine extends StoredRecord {
   worldId: string;
-  sceneId: string;
-  /** Sort key within the scene. */
+  shotId: string;
+  /** Sort key within the shot. */
   order: number;
   speaker: string;
   /** The line itself, with no stage direction in it. */
   line: string;
   delivery: string;
-  /** The beat this line plays over; 0 when it is not tied to one. */
-  beatNumber: number;
   createdAt: string;
 }
 
 export type FilmDoc = Omit<Film, 'worldId'>;
 export type EpisodeDoc = Omit<Episode, 'worldId'>;
 export type SceneDoc = Omit<Scene, 'worldId'>;
-export type BeatDoc = Omit<Beat, 'worldId'>;
+export type ShotDoc = Omit<Shot, 'worldId'>;
 export type DialogueLineDoc = Omit<DialogueLine, 'worldId'>;
 
 /** The free-text fields of a scene, i.e. everything but its own plumbing. */

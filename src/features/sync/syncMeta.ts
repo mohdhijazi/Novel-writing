@@ -42,7 +42,7 @@ export async function countPendingChanges(): Promise<number> {
     db.films,
     db.episodes,
     db.scenes,
-    db.beats,
+    db.shots,
     db.dialogueLines,
   ];
   if (lastSyncedAt === null) {

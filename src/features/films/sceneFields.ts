@@ -65,7 +65,7 @@ export const SCENE_CLOSING_GROUPS: SceneFieldGroup[] = [
     fields: [
       {
         key: 'sfx',
-        label: 'SFX cues — name the beat, e.g. "door slams — beat 3"',
+        label: 'SFX cues — name the shot, e.g. "door slams — shot 3"',
         multiline: true,
       },
       { key: 'music', label: 'Music or OST note — mood only', multiline: true },

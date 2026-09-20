@@ -1,14 +1,12 @@
 import { syncCollectionForWorld, type CollectionSync } from '@/features/sync/syncCollection';
 
-import { listBeatRecords, mergeRemoteBeats } from './beatsRepository';
 import { listDialogueRecords, mergeRemoteDialogue } from './dialogueRepository';
 import { listEpisodeRecords, mergeRemoteEpisodes } from './episodesRepository';
 import { listFilmRecords, mergeRemoteFilms } from './filmsRepository';
 import { listSceneRecords, mergeRemoteScenes } from './scenesRepository';
+import { listShotRecords, mergeRemoteShots } from './shotsRepository';
 import { SCENE_TEXT_FIELDS } from './types';
 import type {
-  Beat,
-  BeatDoc,
   DialogueLine,
   DialogueLineDoc,
   Episode,
@@ -17,6 +15,8 @@ import type {
   FilmDoc,
   Scene,
   SceneDoc,
+  Shot,
+  ShotDoc,
 } from './types';
 
 const filmSync: CollectionSync<Film, FilmDoc> = {
@@ -67,10 +67,10 @@ const sceneSync: CollectionSync<Scene, SceneDoc> = {
   },
 };
 
-const beatSync: CollectionSync<Beat, BeatDoc> = {
-  collection: 'beats',
-  listRecords: listBeatRecords,
-  mergeRemote: mergeRemoteBeats,
+const shotSync: CollectionSync<Shot, ShotDoc> = {
+  collection: 'shots',
+  listRecords: listShotRecords,
+  mergeRemote: mergeRemoteShots,
   toDoc: ({ id, sceneId, number, shotType, visual, camera, createdAt, updatedAt, deletedAt }) => ({
     id,
     sceneId,
@@ -88,25 +88,13 @@ const dialogueSync: CollectionSync<DialogueLine, DialogueLineDoc> = {
   collection: 'dialogueLines',
   listRecords: listDialogueRecords,
   mergeRemote: mergeRemoteDialogue,
-  toDoc: ({
+  toDoc: ({ id, shotId, order, speaker, line, delivery, createdAt, updatedAt, deletedAt }) => ({
     id,
-    sceneId,
+    shotId,
     order,
     speaker,
     line,
     delivery,
-    beatNumber,
-    createdAt,
-    updatedAt,
-    deletedAt,
-  }) => ({
-    id,
-    sceneId,
-    order,
-    speaker,
-    line,
-    delivery,
-    beatNumber,
     createdAt,
     updatedAt,
     deletedAt,
@@ -117,6 +105,6 @@ export async function syncFilmsForWorld(worldId: string, worldFolderId: string):
   await syncCollectionForWorld(filmSync, worldId, worldFolderId);
   await syncCollectionForWorld(episodeSync, worldId, worldFolderId);
   await syncCollectionForWorld(sceneSync, worldId, worldFolderId);
-  await syncCollectionForWorld(beatSync, worldId, worldFolderId);
+  await syncCollectionForWorld(shotSync, worldId, worldFolderId);
   await syncCollectionForWorld(dialogueSync, worldId, worldFolderId);
 }

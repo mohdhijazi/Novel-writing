@@ -23,7 +23,7 @@ export async function getOwnerImage(ownerId: string): Promise<WorldImage | null>
   );
 }
 
-/** Every picture of an owner, oldest first — a beat keeps as many as it needs. */
+/** Every picture of an owner, oldest first — a shot keeps as many as it needs. */
 export async function listOwnerImages(ownerId: string): Promise<WorldImage[]> {
   const images = await db.images.where('ownerId').equals(ownerId).toArray();
   return images
@@ -80,7 +80,7 @@ export async function deleteImage(id: string): Promise<void> {
 
 /**
  * Removes every picture of an owner — called when a single picture is taken
- * away, and when the character, location or beat itself is deleted, so its
+ * away, and when the character, location or shot itself is deleted, so its
  * bytes do not stay behind in Drive.
  */
 export async function deleteOwnerImages(ownerId: string): Promise<void> {

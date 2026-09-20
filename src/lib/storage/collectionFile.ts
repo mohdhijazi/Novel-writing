@@ -21,7 +21,7 @@ export const COLLECTION_NAMES = [
   'films',
   'episodes',
   'scenes',
-  'beats',
+  'shots',
   'dialogueLines',
 ] as const;
 

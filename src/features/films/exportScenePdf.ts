@@ -3,8 +3,9 @@ import type { jsPDF } from 'jspdf';
 import { listOwnerImages } from '@/features/images/imagesRepository';
 import { pdfFileName } from '@/lib/pdf/pdfFileName';
 
+import { listDialogue } from './dialogueRepository';
 import { sceneSlugline } from './types';
-import type { Beat, DialogueLine, Scene } from './types';
+import type { DialogueLine, Scene, Shot } from './types';
 
 /**
  * A scene as a working sheet: A4, Helvetica, one section per part of the scene
@@ -27,7 +28,7 @@ const SLUGLINE = { size: 11, lineHeight: 15 };
 const SECTION = { size: 10, lineHeight: 14, spaceAbove: 20, spaceBelow: 10 };
 const LABEL = { size: 8.5, lineHeight: 11 };
 const BODY = { size: 10.5, lineHeight: 14, spaceBelow: 10 };
-const BEAT = { indent: 14, spaceBelow: 12 };
+const SHOT = { indent: 14, spaceBelow: 12 };
 const IMAGES = { columns: 3, gap: 8, maxHeight: 110, spaceAbove: 6 };
 const PAGE_NUMBER = { size: 9, bottomOffset: 34 };
 
@@ -137,7 +138,7 @@ interface PlacedImage {
 }
 
 /**
- * The beat's pictures, laid out in rows and scaled to fit their cell. Pictures
+ * The shot's pictures, laid out in rows and scaled to fit their cell. Pictures
  * this device has not fetched yet are simply left out.
  */
 async function drawImages(doc: jsPDF, cursor: Cursor, blobs: Blob[], x: number): Promise<void> {
@@ -169,10 +170,11 @@ async function drawImages(doc: jsPDF, cursor: Cursor, blobs: Blob[], x: number):
   }
 }
 
-async function drawBeats(doc: jsPDF, cursor: Cursor, beats: Beat[]): Promise<void> {
-  const x = PAGE.margin + BEAT.indent;
-  for (const beat of beats) {
-    const parts = [`Beat ${String(beat.number)}`, beat.shotType, beat.camera].filter(
+/** A shot, then what it should show, then what is said over it. */
+async function drawShots(doc: jsPDF, cursor: Cursor, shots: Shot[]): Promise<void> {
+  const x = PAGE.margin + SHOT.indent;
+  for (const shot of shots) {
+    const parts = [`Shot ${String(shot.number)}`, shot.shotType, shot.camera].filter(
       (part) => part !== '',
     );
     ensureSpace(doc, cursor, BODY.lineHeight * 2);
@@ -183,39 +185,43 @@ async function drawBeats(doc: jsPDF, cursor: Cursor, beats: Beat[]): Promise<voi
     cursor.y += BODY.lineHeight + 2;
 
     doc.setFont('helvetica', 'normal');
-    if (beat.visual.trim() !== '') {
+    if (shot.visual.trim() !== '') {
       writeLines(
         doc,
         cursor,
-        wrap(doc, beat.visual.trim(), MEASURE - BEAT.indent),
+        wrap(doc, shot.visual.trim(), MEASURE - SHOT.indent),
         x,
         BODY.lineHeight,
       );
     }
 
-    const images = await listOwnerImages(beat.id);
+    const images = await listOwnerImages(shot.id);
     const blobs = images.flatMap((image) => (image.blob === null ? [] : [image.blob]));
     if (blobs.length > 0) {
       await drawImages(doc, cursor, blobs, x);
     }
-    cursor.y += BEAT.spaceBelow;
+
+    drawDialogue(doc, cursor, await listDialogue(shot.id));
+    cursor.y += SHOT.spaceBelow;
   }
 }
 
+/** The lines of one shot, set in under it. */
 function drawDialogue(doc: jsPDF, cursor: Cursor, dialogue: DialogueLine[]): void {
-  const x = PAGE.margin + BEAT.indent;
+  const x = PAGE.margin + SHOT.indent;
+  const lineX = x + SHOT.indent;
   for (const line of dialogue) {
     const heading = [
       line.speaker.trim() === '' ? 'Unnamed' : line.speaker.toUpperCase(),
       line.delivery.trim() === '' ? '' : `(${line.delivery.trim()})`,
-      line.beatNumber === 0 ? '' : `over beat ${String(line.beatNumber)}`,
     ].filter((part) => part !== '');
 
     ensureSpace(doc, cursor, BODY.lineHeight * 2);
+    cursor.y += 4;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(BODY.size);
     doc.setTextColor(...INK);
-    doc.text(heading.join('  ·  '), PAGE.margin, cursor.y, { baseline: 'top' });
+    doc.text(heading.join('  ·  '), x, cursor.y, { baseline: 'top' });
     cursor.y += BODY.lineHeight + 2;
 
     doc.setFont('helvetica', 'normal');
@@ -223,12 +229,11 @@ function drawDialogue(doc: jsPDF, cursor: Cursor, dialogue: DialogueLine[]): voi
       writeLines(
         doc,
         cursor,
-        wrap(doc, line.line.trim(), MEASURE - BEAT.indent),
-        x,
+        wrap(doc, line.line.trim(), MEASURE - SHOT.indent * 2),
+        lineX,
         BODY.lineHeight,
       );
     }
-    cursor.y += BEAT.spaceBelow;
   }
 }
 
@@ -289,19 +294,13 @@ function drawPageNumbers(doc: jsPDF): void {
 
 export interface SceneExport {
   scene: Scene;
-  beats: Beat[];
-  dialogue: DialogueLine[];
+  shots: Shot[];
   /** Where the scene sits, e.g. "The Long Winter · Episode 1 — The bell at dawn". */
   context: string;
 }
 
 /** Writes the scene out as a sheet and hands it to the browser to save. */
-export async function exportScenePdf({
-  scene,
-  beats,
-  dialogue,
-  context,
-}: SceneExport): Promise<void> {
+export async function exportScenePdf({ scene, shots, context }: SceneExport): Promise<void> {
   // Loaded on demand: the PDF library is far larger than the app itself.
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: [PAGE.width, PAGE.height] });
@@ -321,14 +320,9 @@ export async function exportScenePdf({
     field(doc, cursor, 'Mood / style', scene.mood);
   }
 
-  if (beats.length > 0) {
+  if (shots.length > 0) {
     sectionHeading(doc, cursor, 'Shot breakdown');
-    await drawBeats(doc, cursor, beats);
-  }
-
-  if (dialogue.length > 0) {
-    sectionHeading(doc, cursor, 'Dialogue');
-    drawDialogue(doc, cursor, dialogue);
+    await drawShots(doc, cursor, shots);
   }
 
   if ([scene.sfx, scene.music].some((value) => value.trim() !== '')) {

@@ -3,15 +3,10 @@ import { HoldToDelete } from '@/components/HoldToDelete';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './DialogueCard.module.css';
-import {
-  deleteDialogueLine,
-  saveDialogueBeat,
-  saveDialogueField,
-  type DialogueField,
-} from './dialogueRepository';
+import { deleteDialogueLine, saveDialogueField, type DialogueField } from './dialogueRepository';
 import type { DialogueLine } from './types';
 
-/** One spoken line: the source for the dub and the subtitles. */
+/** One line said over the shot it sits in: the source for the dub and subtitles. */
 export function DialogueCard({ line }: { line: DialogueLine }) {
   function save(field: DialogueField, value: string) {
     void saveDialogueField(line.id, field, value).then(() => {
@@ -34,17 +29,6 @@ export function DialogueCard({ line }: { line: DialogueLine }) {
           value={line.delivery}
           onSave={(value) => {
             save('delivery', value);
-          }}
-        />
-        <AutosaveField
-          label="Beat it plays over"
-          value={line.beatNumber === 0 ? '' : String(line.beatNumber)}
-          numeric
-          onSave={(value) => {
-            const beat = Number.parseInt(value, 10);
-            void saveDialogueBeat(line.id, Number.isNaN(beat) ? 0 : beat).then(() => {
-              requestSync(EDIT_SYNC_DELAY_MS);
-            });
           }}
         />
       </div>

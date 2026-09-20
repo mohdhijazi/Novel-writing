@@ -1,8 +1,7 @@
 import { db } from '@/lib/db/database';
 import { mergeByUpdatedAt } from '@/lib/storage/mergeRecords';
 
-import { deleteBeatsOfScene } from './beatsRepository';
-import { deleteDialogueOfScene } from './dialogueRepository';
+import { deleteShotsOfScene } from './shotsRepository';
 import { normalizeScene } from './types';
 import type { Scene, SceneDoc, SceneTextField } from './types';
 
@@ -70,8 +69,8 @@ export async function saveSceneField(
 
 export async function deleteScene(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
-  // One transaction, so a scene never goes without its beats and dialogue.
-  await db.transaction('rw', db.scenes, db.beats, db.dialogueLines, db.images, async () => {
+  // One transaction, so a scene never goes without its shots and their lines.
+  await db.transaction('rw', [db.scenes, db.shots, db.dialogueLines, db.images], async () => {
     await removeScene(id, timestamp);
   });
 }
@@ -88,8 +87,7 @@ export async function deleteScenesOfEpisode(episodeId: string, timestamp: string
 
 async function removeScene(id: string, timestamp: string): Promise<void> {
   await db.scenes.update(id, { deletedAt: timestamp, updatedAt: timestamp });
-  await deleteBeatsOfScene(id, timestamp);
-  await deleteDialogueOfScene(id, timestamp);
+  await deleteShotsOfScene(id, timestamp);
 }
 
 /** Applies the scenes from Drive; returns whether the local side holds more. */

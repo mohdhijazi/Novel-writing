@@ -40,7 +40,7 @@ export async function deleteFilm(id: string): Promise<void> {
   // One transaction, so a film never goes without its episodes and scenes.
   await db.transaction(
     'rw',
-    [db.films, db.episodes, db.scenes, db.beats, db.dialogueLines, db.images],
+    [db.films, db.episodes, db.scenes, db.shots, db.dialogueLines, db.images],
     async () => {
       await db.films.update(id, { deletedAt: timestamp, updatedAt: timestamp });
       await deleteEpisodesOfFilm(id, timestamp);

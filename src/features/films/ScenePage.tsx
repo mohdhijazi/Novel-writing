@@ -6,16 +6,14 @@ import { AutosaveField } from '@/components/AutosaveField';
 import { SelectField } from '@/components/SelectField';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
-import { BeatCard } from './BeatCard';
-import { DialogueCard } from './DialogueCard';
 import styles from './ScenePage.module.css';
-import { createBeat, listBeats } from './beatsRepository';
-import { createDialogueLine, listDialogue } from './dialogueRepository';
+import { ShotCard } from './ShotCard';
 import { getEpisode } from './episodesRepository';
 import { exportScenePdf } from './exportScenePdf';
 import { getFilm } from './filmsRepository';
 import { SCENE_CLOSING_GROUPS, SCENE_SETUP_GROUPS, type SceneFieldGroup } from './sceneFields';
 import { getScene, saveSceneField } from './scenesRepository';
+import { createShot, listShots } from './shotsRepository';
 import { sceneSlugline, type Scene, type SceneTextField } from './types';
 
 export function ScenePage() {
@@ -27,12 +25,8 @@ export function ScenePage() {
     async () => (sceneId === undefined ? null : await getScene(sceneId)),
     [sceneId],
   );
-  const beats = useLiveQuery(
-    async () => (sceneId === undefined ? [] : await listBeats(sceneId)),
-    [sceneId],
-  );
-  const dialogue = useLiveQuery(
-    async () => (sceneId === undefined ? [] : await listDialogue(sceneId)),
+  const shots = useLiveQuery(
+    async () => (sceneId === undefined ? [] : await listShots(sceneId)),
     [sceneId],
   );
   // Only to say, on the exported sheet, where the scene sits.
@@ -73,8 +67,7 @@ export function ScenePage() {
             .join(' — ');
     exportScenePdf({
       scene: current,
-      beats: beats ?? [],
-      dialogue: dialogue ?? [],
+      shots: shots ?? [],
       context: [film?.title ?? '', episodeName].filter((part) => part !== '').join('  ·  '),
     })
       .then(() => {
@@ -86,20 +79,11 @@ export function ScenePage() {
       });
   }
 
-  function addBeat() {
+  function addShot() {
     if (worldId === undefined || sceneId === undefined) {
       return;
     }
-    void createBeat(worldId, sceneId).then(() => {
-      requestSync();
-    });
-  }
-
-  function addLine() {
-    if (worldId === undefined || sceneId === undefined) {
-      return;
-    }
-    void createDialogueLine(worldId, sceneId).then(() => {
+    void createShot(worldId, sceneId).then(() => {
       requestSync();
     });
   }
@@ -174,35 +158,18 @@ export function ScenePage() {
       <section className={styles.group}>
         <h3 className={styles.groupTitle}>Shot breakdown</h3>
         <p className={styles.groupNote}>
-          A clip runs five seconds, so a scene is a handful of short beats rather than one long
-          description.
+          A clip runs five seconds, so a scene is a handful of short shots rather than one long
+          description. What is said goes in the shot it is said over.
         </p>
-        {beats && beats.length > 0 && (
+        {shots && shots.length > 0 && (
           <ol className={styles.cards}>
-            {beats.map((beat) => (
-              <BeatCard key={beat.id} beat={beat} />
+            {shots.map((shot) => (
+              <ShotCard key={shot.id} shot={shot} />
             ))}
           </ol>
         )}
-        <button type="button" className={styles.add} onClick={addBeat}>
-          + Add beat
-        </button>
-      </section>
-
-      <section className={styles.group}>
-        <h3 className={styles.groupTitle}>Dialogue</h3>
-        <p className={styles.groupNote}>
-          These lines are what the dub and the subtitles are made from.
-        </p>
-        {dialogue && dialogue.length > 0 && (
-          <ol className={styles.cards}>
-            {dialogue.map((line) => (
-              <DialogueCard key={line.id} line={line} />
-            ))}
-          </ol>
-        )}
-        <button type="button" className={styles.add} onClick={addLine}>
-          + Add line
+        <button type="button" className={styles.add} onClick={addShot}>
+          + Add shot
         </button>
       </section>
 
