@@ -123,6 +123,11 @@ Descriptive narration is left out; the visuals carry it.
   handful of short beats, each one image. **Dialogue lines** are records too, and name the beat they
   play over — they are the source for the dub and the subtitles later on.
 - Deleting a scene tombstones its beats and its lines in the same transaction.
+- **Export as PDF** on a scene writes a working sheet: A4, Helvetica, one section per part of the
+  template, the beat's pictures printed under it, and page numbers only when it runs to more than one
+  page. Empty fields print nothing at all — a sheet full of blank labels is worse than a short one.
+  It is a production document, not a book, so it shares nothing with the novel export but
+  `lib/pdf/pdfFileName`; its measurements live at the top of `exportScenePdf.ts`.
 - Still to come from the user: more of what a scene holds.
 
 ## Importing a world
@@ -142,7 +147,7 @@ headings reading "Chapter I:" over the chapter title, page number bottom-right a
 headers. The novel's title gets a page of its own, which carries no number, so the first chapter
 page reads "1". `ExportDialog` picks which chapters go in, whether to open with a title page, and the paper size;
 chapters keep their own numbers whether or not their neighbours were included. Measurements live in
-`pdfLayout.ts`: type sizes are fixed whatever the paper, while margins are 15% of the page width,
+`pdfLayout.ts` (the file name helper is shared, in `lib/pdf/`): type sizes are fixed whatever the paper, while margins are 15% of the page width,
 widening further so a line never runs past `MAX_MEASURE` — a wide page gets wider margins rather
 than lines too long to read.
 

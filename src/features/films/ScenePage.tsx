@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { AutosaveField } from '@/components/AutosaveField';
@@ -10,12 +11,17 @@ import { DialogueCard } from './DialogueCard';
 import styles from './ScenePage.module.css';
 import { createBeat, listBeats } from './beatsRepository';
 import { createDialogueLine, listDialogue } from './dialogueRepository';
+import { getEpisode } from './episodesRepository';
+import { exportScenePdf } from './exportScenePdf';
+import { getFilm } from './filmsRepository';
 import { SCENE_CLOSING_GROUPS, SCENE_SETUP_GROUPS, type SceneFieldGroup } from './sceneFields';
 import { getScene, saveSceneField } from './scenesRepository';
 import { sceneSlugline, type Scene, type SceneTextField } from './types';
 
 export function ScenePage() {
-  const { worldId, sceneId } = useParams();
+  const { worldId, filmId, episodeId, sceneId } = useParams();
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportFailed, setExportFailed] = useState(false);
 
   const scene = useLiveQuery(
     async () => (sceneId === undefined ? null : await getScene(sceneId)),
@@ -28,6 +34,15 @@ export function ScenePage() {
   const dialogue = useLiveQuery(
     async () => (sceneId === undefined ? [] : await listDialogue(sceneId)),
     [sceneId],
+  );
+  // Only to say, on the exported sheet, where the scene sits.
+  const episode = useLiveQuery(
+    async () => (episodeId === undefined ? null : await getEpisode(episodeId)),
+    [episodeId],
+  );
+  const film = useLiveQuery(
+    async () => (filmId === undefined ? null : await getFilm(filmId)),
+    [filmId],
   );
 
   if (scene === undefined) {
@@ -45,6 +60,30 @@ export function ScenePage() {
     void saveSceneField(sceneId, field, value).then(() => {
       requestSync(EDIT_SYNC_DELAY_MS);
     });
+  }
+
+  function handleExport(current: Scene) {
+    setIsExporting(true);
+    setExportFailed(false);
+    const episodeName =
+      episode === null || episode === undefined
+        ? ''
+        : [`Episode ${String(episode.number)}`, episode.title]
+            .filter((part) => part !== '')
+            .join(' — ');
+    exportScenePdf({
+      scene: current,
+      beats: beats ?? [],
+      dialogue: dialogue ?? [],
+      context: [film?.title ?? '', episodeName].filter((part) => part !== '').join('  ·  '),
+    })
+      .then(() => {
+        setIsExporting(false);
+      })
+      .catch(() => {
+        setIsExporting(false);
+        setExportFailed(true);
+      });
   }
 
   function addBeat() {
@@ -107,14 +146,27 @@ export function ScenePage() {
         <Link to="../.." relative="path" className={styles.back}>
           ← Scenes
         </Link>
-        <h2 className={styles.heading}>
-          <span className={styles.sceneNumber}>
-            Scene {scene.number}
-            {scene.sceneCode !== '' && ` · ${scene.sceneCode}`}
-          </span>
-          {scene.title || 'Untitled scene'}
-        </h2>
+        <div className={styles.titleRow}>
+          <h2 className={styles.heading}>
+            <span className={styles.sceneNumber}>
+              Scene {scene.number}
+              {scene.sceneCode !== '' && ` · ${scene.sceneCode}`}
+            </span>
+            {scene.title || 'Untitled scene'}
+          </h2>
+          <button
+            type="button"
+            className={styles.export}
+            disabled={isExporting}
+            onClick={() => {
+              handleExport(scene);
+            }}
+          >
+            {isExporting ? 'Making the PDF…' : 'Export as PDF'}
+          </button>
+        </div>
         {slugline !== '' && <p className={styles.slugline}>{slugline}</p>}
+        {exportFailed && <p className={styles.error}>The PDF could not be made. Try again.</p>}
       </div>
 
       {SCENE_SETUP_GROUPS.map((group) => renderGroup(group, scene))}

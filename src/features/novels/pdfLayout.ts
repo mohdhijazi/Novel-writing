@@ -138,9 +138,3 @@ export function toRoman(value: number): string {
   }
   return roman;
 }
-
-/** A file name that every operating system will accept. */
-export function pdfFileName(title: string): string {
-  const safe = title.replace(/[\\/:*?"<>|]/g, ' ').trim();
-  return `${safe === '' ? 'Untitled novel' : safe}.pdf`;
-}

@@ -1,5 +1,7 @@
 import type { jsPDF } from 'jspdf';
 
+import { pdfFileName } from '@/lib/pdf/pdfFileName';
+
 import { listParagraphs } from './paragraphsRepository';
 import {
   BODY,
@@ -8,7 +10,6 @@ import {
   PAGE_NUMBER,
   TITLE_PAGE,
   layoutFor,
-  pdfFileName,
   toRoman,
   type Layout,
   type PaperSize,
@@ -208,5 +209,5 @@ export async function exportNovelPdf(
   }
 
   drawPageNumbers(doc, layout, options.includeTitlePage ? 2 : 1);
-  doc.save(pdfFileName(novel.title));
+  doc.save(pdfFileName(novel.title, 'Untitled novel'));
 }
