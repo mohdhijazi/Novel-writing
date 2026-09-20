@@ -134,13 +134,24 @@ export async function updateJsonFile(fileId: string, content: unknown): Promise<
   return readJson<DriveFile>(response);
 }
 
-/** Moves a file or folder to Drive's bin, where the user can still recover it. */
+/**
+ * Moves a file or folder to Drive's bin, where the user can still recover it.
+ * A file that is already gone counts as binned, so a second device repeating
+ * the same delete does not fail the whole sync.
+ */
 export async function trashFile(fileId: string): Promise<void> {
-  await driveFetch(`${FILES_URL}/${fileId}`, {
+  const headers = new Headers({
+    Authorization: `Bearer ${requireAccessToken()}`,
+    'Content-Type': JSON_MIME_TYPE,
+  });
+  const response = await fetch(`${FILES_URL}/${fileId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': JSON_MIME_TYPE },
+    headers,
     body: JSON.stringify({ trashed: true }),
   });
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Google Drive request failed (${String(response.status)}).`);
+  }
 }
 
 /**
@@ -162,4 +173,38 @@ export async function getTrashState(fileId: string): Promise<{ trashed: boolean 
 export async function downloadJsonFile<T>(fileId: string): Promise<T> {
   const response = await driveFetch(`${FILES_URL}/${fileId}?alt=media`);
   return readJson<T>(response);
+}
+
+/**
+ * Uploads bytes — a picture — as a new file. Binary content cannot be built
+ * into a string body the way the JSON uploads above are, so the multipart
+ * parts are assembled as a Blob and the bytes pass through untouched.
+ */
+export async function createBinaryFile(
+  name: string,
+  parentId: string,
+  content: Blob,
+): Promise<DriveFile> {
+  const metadata = { name, mimeType: content.type, parents: [parentId] };
+  const body = new Blob([
+    `--${MULTIPART_BOUNDARY}\r\nContent-Type: ${JSON_MIME_TYPE}; charset=UTF-8\r\n\r\n`,
+    JSON.stringify(metadata),
+    `\r\n--${MULTIPART_BOUNDARY}\r\nContent-Type: ${content.type}\r\n\r\n`,
+    content,
+    `\r\n--${MULTIPART_BOUNDARY}--\r\n`,
+  ]);
+  const response = await driveFetch(
+    `${UPLOAD_URL}?uploadType=multipart&fields=id,name,modifiedTime`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': `multipart/related; boundary=${MULTIPART_BOUNDARY}` },
+      body,
+    },
+  );
+  return readJson<DriveFile>(response);
+}
+
+export async function downloadFileBlob(fileId: string): Promise<Blob> {
+  const response = await driveFetch(`${FILES_URL}/${fileId}?alt=media`);
+  return response.blob();
 }

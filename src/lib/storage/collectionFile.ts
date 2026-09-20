@@ -17,6 +17,7 @@ export const COLLECTION_NAMES = [
   'relations',
   'tickets',
   'ticketLinks',
+  'images',
 ] as const;
 
 export type CollectionName = (typeof COLLECTION_NAMES)[number];

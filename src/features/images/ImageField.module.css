@@ -1,0 +1,79 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.preview {
+  max-width: 100%;
+  max-height: 14rem;
+  object-fit: cover;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.choose {
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.choose:hover:enabled {
+  border-color: var(--color-accent);
+}
+
+.choose:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.remove {
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.remove:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+/* The real input is driven by the button beside it. */
+.input {
+  display: none;
+}
+
+.error {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}

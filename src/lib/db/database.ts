@@ -4,6 +4,7 @@ import type { WorldCalendar } from '@/features/calendar/types';
 import type { Character } from '@/features/characters/types';
 import type { WorldEvent } from '@/features/events/types';
 import type { Idea } from '@/features/ideas/types';
+import type { WorldImage } from '@/features/images/types';
 import type { Connection, Location } from '@/features/locations/types';
 import type { Relation, Ticket, TicketLink } from '@/features/relations/types';
 import type { SyncMeta } from '@/features/sync/syncMeta';
@@ -31,6 +32,7 @@ class WorldBuildingDatabase extends Dexie {
   relations!: EntityTable<Relation, 'id'>;
   tickets!: EntityTable<Ticket, 'id'>;
   ticketLinks!: EntityTable<TicketLink, 'id'>;
+  images!: EntityTable<WorldImage, 'id'>;
   syncMeta!: EntityTable<SyncMeta, 'id'>;
 
   constructor() {
@@ -69,6 +71,9 @@ class WorldBuildingDatabase extends Dexie {
     });
     this.version(10).stores({
       syncMeta: 'id',
+    });
+    this.version(11).stores({
+      images: 'id, worldId, ownerId, updatedAt',
     });
   }
 }

@@ -1,3 +1,4 @@
+import { deleteOwnerImages } from '@/features/images/imagesRepository';
 import { db } from '@/lib/db/database';
 import { mergeByUpdatedAt } from '@/lib/storage/mergeRecords';
 
@@ -68,6 +69,8 @@ export async function saveLocationField(
 export async function deleteLocation(id: string): Promise<void> {
   const timestamp = new Date().toISOString();
   await db.locations.update(id, { deletedAt: timestamp, updatedAt: timestamp });
+  // Its picture goes too, so the file does not stay behind in Drive.
+  await deleteOwnerImages(id);
 }
 
 /** Applies the locations from Drive; returns whether the local side holds more. */

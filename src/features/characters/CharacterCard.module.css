@@ -41,6 +41,10 @@
   border-top: 1px solid var(--color-border);
 }
 
+.portrait {
+  padding-block-start: var(--space-4);
+}
+
 .group {
   display: flex;
   flex-direction: column;

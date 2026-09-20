@@ -1,6 +1,7 @@
 import { syncCalendarForWorld } from '@/features/calendar/syncCalendar';
 import { syncCharactersForWorld } from '@/features/characters/syncCharacters';
 import { syncEventsForWorld } from '@/features/events/syncEvents';
+import { syncImagesForWorld } from '@/features/images/syncImages';
 import { syncConnectionsForWorld } from '@/features/locations/syncConnections';
 import { syncIdeasForWorld } from '@/features/ideas/syncIdeas';
 import { syncLocationsForWorld } from '@/features/locations/syncLocations';
@@ -18,6 +19,7 @@ export async function syncAll(): Promise<void> {
     await syncLocationsForWorld(world.worldId, world.driveFolderId);
     await syncConnectionsForWorld(world.worldId, world.driveFolderId);
     await syncRelationsForWorld(world.worldId, world.driveFolderId);
+    await syncImagesForWorld(world.worldId, world.driveFolderId);
     await syncNovelsForWorld(world.worldId, world.driveFolderId);
   }
 }

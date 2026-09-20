@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { AutosaveField } from '@/components/AutosaveField';
 import { HoldToDelete } from '@/components/HoldToDelete';
+import { ImageField } from '@/features/images/ImageField';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './CharacterCard.module.css';
@@ -32,6 +33,10 @@ export function CharacterCard({ character }: { character: Character }) {
 
       {isOpen && (
         <div className={styles.details}>
+          <div className={styles.portrait}>
+            <ImageField worldId={character.worldId} ownerId={character.id} label="Portrait" />
+          </div>
+
           {CHARACTER_FIELD_GROUPS.map((group) => (
             <section key={group.title} className={styles.group}>
               <h3 className={styles.groupTitle}>{group.title}</h3>

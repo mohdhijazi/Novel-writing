@@ -33,6 +33,9 @@ My Drive/
       relations.json          one per relation board
       tickets.json            cards on those boards
       ticketLinks.json        labelled lines between cards
+      images.json             which picture belongs to which character or location
+      Images/                 the pictures themselves, one file each
+        <image id>.jpg
       Novels/
         <Novel title>/
           novel.json
@@ -65,6 +68,29 @@ My Drive/
   pending count is every record with `updatedAt` above it (each table indexes `updatedAt`, so this
   is counted, never scanned). Reconnecting offers a sync instead of uploading silently; declining
   pauses automatic syncs until the user presses Sync now.
+
+## Pictures
+
+A character or a location can have one picture, added through `ImageField` in `src/features/images/`
+— a shared feature, the way `lib/map/` is shared: both features use its field, and everything about
+pictures lives there.
+
+- The file the user picks is scaled to fit 1400 px and re-encoded as JPEG (`lib/images/prepareImage`)
+  before it is stored. A phone photo is several megabytes; it would otherwise cost that in IndexedDB,
+  in Drive and in every sync.
+- The bytes never change once written. Replacing a picture tombstones the old record and writes a new
+  one with a new file, so there is nothing to merge — the only question two devices can disagree about
+  is which picture is current, and `updatedAt` settles that like any other record.
+- `images.json` holds the records (owner, `driveFileId`, timestamps) and syncs like any other
+  collection. The bytes go up as whole files in `Images/`, pushed **before** the collection file so the
+  records uploaded with them already point at their file, and pulled **after** it so a record is known
+  before its bytes are fetched.
+- Fetching bytes does not touch `updatedAt`: the record did not change, and bumping it would send an
+  unchanged file back to Drive.
+- Removing a picture bins its Drive file and clears `driveFileId`, so it is binned once; deleting a
+  character or location removes its picture too, so no file is left behind in Drive.
+- A device that has the record but not the bytes says so and waits for a sync — pictures are as
+  offline-friendly as everything else, but they cannot appear out of nothing.
 
 ## Importing a world
 

@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 
 import { AutosaveField } from '@/components/AutosaveField';
 import { HoldToDelete } from '@/components/HoldToDelete';
+import { ImageField } from '@/features/images/ImageField';
 import { EDIT_SYNC_DELAY_MS, requestSync } from '@/features/sync/syncScheduler';
 
 import styles from './LocationDetails.module.css';
@@ -63,6 +64,7 @@ export function LocationDetails({
             save('area', value);
           }}
         />
+        <ImageField worldId={location.worldId} ownerId={location.id} label="Picture" />
       </div>
 
       <section className={styles.connections}>
