@@ -3,6 +3,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { WorldCalendar } from '@/features/calendar/types';
 import type { Character } from '@/features/characters/types';
 import type { WorldEvent } from '@/features/events/types';
+import type { Episode, Film, Scene } from '@/features/films/types';
 import type { Idea } from '@/features/ideas/types';
 import type { WorldImage } from '@/features/images/types';
 import type { Connection, Location } from '@/features/locations/types';
@@ -33,6 +34,9 @@ class WorldBuildingDatabase extends Dexie {
   tickets!: EntityTable<Ticket, 'id'>;
   ticketLinks!: EntityTable<TicketLink, 'id'>;
   images!: EntityTable<WorldImage, 'id'>;
+  films!: EntityTable<Film, 'id'>;
+  episodes!: EntityTable<Episode, 'id'>;
+  scenes!: EntityTable<Scene, 'id'>;
   syncMeta!: EntityTable<SyncMeta, 'id'>;
 
   constructor() {
@@ -74,6 +78,11 @@ class WorldBuildingDatabase extends Dexie {
     });
     this.version(11).stores({
       images: 'id, worldId, ownerId, updatedAt',
+    });
+    this.version(12).stores({
+      films: 'id, worldId, title, updatedAt',
+      episodes: 'id, worldId, filmId, number, updatedAt',
+      scenes: 'id, worldId, episodeId, number, updatedAt',
     });
   }
 }

@@ -5,6 +5,7 @@
  */
 export const WORLD_TABS = [
   { slug: 'novels', label: 'Novels' },
+  { slug: 'films', label: 'Films' },
   { slug: 'characters', label: 'Characters' },
   { slug: 'locations', label: 'Locations' },
   { slug: 'events', label: 'Events' },

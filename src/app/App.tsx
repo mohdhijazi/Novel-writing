@@ -2,7 +2,10 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { CalendarTab } from '@/features/calendar/CalendarTab';
 import { CharactersTab } from '@/features/characters/CharactersTab';
+import { EpisodePage } from '@/features/films/EpisodePage';
 import { EventsTab } from '@/features/events/EventsTab';
+import { FilmPage } from '@/features/films/FilmPage';
+import { FilmsTab } from '@/features/films/FilmsTab';
 import { IdeasTab } from '@/features/ideas/IdeasTab';
 import { DriveProvider } from '@/features/drive/DriveProvider';
 import { LocationsTab } from '@/features/locations/LocationsTab';
@@ -27,6 +30,7 @@ export function App() {
           <Route path="/worlds/:worldId" element={<WorldPage />}>
             <Route index element={<Navigate to={DEFAULT_WORLD_TAB} replace />} />
             <Route path="novels" element={<NovelsTab />} />
+            <Route path="films" element={<FilmsTab />} />
             <Route path="characters" element={<CharactersTab />} />
             <Route path="locations" element={<LocationsTab />} />
             <Route path="calendar" element={<CalendarTab />} />
@@ -36,6 +40,8 @@ export function App() {
             <Route path="relations/:relationId" element={<RelationBoard />} />
             <Route path="novels/:novelId" element={<NovelPage />} />
             <Route path="novels/:novelId/chapters/:chapterId" element={<ChapterEditorPage />} />
+            <Route path="films/:filmId" element={<FilmPage />} />
+            <Route path="films/:filmId/episodes/:episodeId" element={<EpisodePage />} />
             <Route path=":tabSlug" element={<WorldTabPanel />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

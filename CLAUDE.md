@@ -33,6 +33,9 @@ My Drive/
       relations.json          one per relation board
       tickets.json            cards on those boards
       ticketLinks.json        labelled lines between cards
+      films.json              films and series set in the world
+      episodes.json           each names the film it belongs to
+      scenes.json             each names the episode it belongs to
       images.json             which picture belongs to which character or location
       Images/                 the pictures themselves, one file each
         <image id>.jpg
@@ -55,6 +58,11 @@ My Drive/
 - Syncing merges record by record (newest `updatedAt` wins) and uploads only what changed.
 - Collections mirror the tabs of a world. Novels are folders rather than a collection file,
   because they hold chapter folders.
+- Films are the other way round: a film, its episodes and their scenes are three flat collections,
+  each record naming its parent, the way relations, tickets and ticket links are. They are small
+  records, so folders would buy nothing. Deleting a film tombstones its episodes and their scenes in
+  one transaction, and deleting an episode its scenes — a record with no way back to it is worse than
+  no record. A scene has a number and a title for now; what else it holds is still to come.
 - Paragraphs are one JSON file per chapter, not one file each: a file per paragraph would mean
   renaming every later file whenever a paragraph is inserted mid-chapter.
 - Upload decisions use a per-chapter revision counter (`paragraphsRevision` vs

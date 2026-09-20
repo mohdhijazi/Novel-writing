@@ -39,6 +39,9 @@ export async function countPendingChanges(): Promise<number> {
     db.tickets,
     db.ticketLinks,
     db.images,
+    db.films,
+    db.episodes,
+    db.scenes,
   ];
   if (lastSyncedAt === null) {
     const counts = await Promise.all(tables.map((table) => table.count()));
