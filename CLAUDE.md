@@ -138,7 +138,8 @@ Descriptive narration is left out; the visuals carry it.
   skipped, because a warning nobody sees is no warning at all.
 - **Export as PDF** on a scene writes a working sheet: A4, Helvetica, one section per part of the
   template, the beat's pictures printed under it, and page numbers only when it runs to more than one
-  page. Empty fields print nothing at all — a sheet full of blank labels is worse than a short one.
+  page. Spoken lines are printed in quotation marks, unless the writer typed their own. Empty fields
+  print nothing at all — a sheet full of blank labels is worse than a short one.
   It is a production document, not a book, so it shares nothing with the novel export but
   `lib/pdf/pdfFileName`; its measurements live at the top of `exportScenePdf.ts`.
 - Still to come from the user: more of what a scene holds.

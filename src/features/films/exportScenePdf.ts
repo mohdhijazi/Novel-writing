@@ -206,6 +206,14 @@ async function drawShots(doc: jsPDF, cursor: Cursor, shots: Shot[]): Promise<voi
   }
 }
 
+/** Quotation marks a writer may have typed around a line themselves. */
+const ALREADY_QUOTED = /^["“«].*["”»]$/s;
+
+/** What is spoken, in quotes — unless the writer wrote their own. */
+function quoted(spoken: string): string {
+  return ALREADY_QUOTED.test(spoken) ? spoken : `“${spoken}”`;
+}
+
 /** The lines of one shot, set in under it. */
 function drawDialogue(doc: jsPDF, cursor: Cursor, dialogue: DialogueLine[]): void {
   const x = PAGE.margin + SHOT.indent;
@@ -229,7 +237,7 @@ function drawDialogue(doc: jsPDF, cursor: Cursor, dialogue: DialogueLine[]): voi
       writeLines(
         doc,
         cursor,
-        wrap(doc, line.line.trim(), MEASURE - SHOT.indent * 2),
+        wrap(doc, quoted(line.line.trim()), MEASURE - SHOT.indent * 2),
         lineX,
         BODY.lineHeight,
       );
