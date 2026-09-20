@@ -35,12 +35,7 @@ export function WorldsPage() {
         <SyncStatus />
       </header>
 
-      <NameForm
-        label="World name"
-        placeholder="Aetheria"
-        submitLabel="Create world"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="World name" submitLabel="Create world" onSubmit={handleCreate} />
 
       {isSyncing && <p className={styles.note}>Syncing with Google Drive…</p>}
       {error !== null && <p className={styles.error}>{error}</p>}

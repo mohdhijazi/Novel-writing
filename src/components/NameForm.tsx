@@ -4,13 +4,12 @@ import styles from './NameForm.module.css';
 
 interface NameFormProps {
   label: string;
-  placeholder: string;
   submitLabel: string;
   onSubmit: (value: string) => void;
 }
 
 /** One-line "name it and add it" form, shared by worlds, novels and chapters. */
-export function NameForm({ label, placeholder, submitLabel, onSubmit }: NameFormProps) {
+export function NameForm({ label, submitLabel, onSubmit }: NameFormProps) {
   const inputId = useId();
   const [value, setValue] = useState('');
 
@@ -37,7 +36,6 @@ export function NameForm({ label, placeholder, submitLabel, onSubmit }: NameForm
           onChange={(event) => {
             setValue(event.target.value);
           }}
-          placeholder={placeholder}
           autoComplete="off"
         />
         <button type="submit" className={styles.button} disabled={value.trim() === ''}>

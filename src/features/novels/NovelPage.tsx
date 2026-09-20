@@ -70,12 +70,7 @@ export function NovelPage() {
         </div>
       </div>
 
-      <NameForm
-        label="Chapter title"
-        placeholder="The road at dusk"
-        submitLabel="Add chapter"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Chapter title" submitLabel="Add chapter" onSubmit={handleCreate} />
 
       {chapters && chapters.length > 0 ? (
         <ol className={styles.list}>

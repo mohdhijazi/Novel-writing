@@ -75,7 +75,6 @@ export function ParagraphEditor({ paragraph, position, isOpen, onToggle }: Parag
           onChange={(event) => {
             setText(event.target.value);
           }}
-          placeholder="Write…"
           rows={1}
           aria-label={`Paragraph ${String(position)}`}
         />

@@ -52,7 +52,6 @@ export function EventsTab() {
             id="event-name"
             className={styles.input}
             value={name}
-            placeholder="The bridge falls"
             autoComplete="off"
             onChange={(changeEvent) => {
               setName(changeEvent.target.value);
@@ -62,13 +61,12 @@ export function EventsTab() {
 
         <div className={styles.yearField}>
           <label className={styles.label} htmlFor="event-year">
-            Year
+            Year — negative for before year zero
           </label>
           <input
             id="event-year"
             className={styles.input}
             value={year}
-            placeholder="-120"
             autoComplete="off"
             onChange={(changeEvent) => {
               setYear(changeEvent.target.value);

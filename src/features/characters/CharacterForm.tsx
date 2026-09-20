@@ -37,7 +37,6 @@ export function CharacterForm({ onSubmit }: CharacterFormProps) {
           onChange={(event) => {
             setFirstName(event.target.value);
           }}
-          placeholder="Mira"
           autoComplete="off"
         />
       </div>
@@ -53,7 +52,6 @@ export function CharacterForm({ onSubmit }: CharacterFormProps) {
           onChange={(event) => {
             setLastName(event.target.value);
           }}
-          placeholder="Vale"
           autoComplete="off"
         />
       </div>

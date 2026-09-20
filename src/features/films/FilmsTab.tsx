@@ -26,12 +26,7 @@ export function FilmsTab() {
 
   return (
     <section className={styles.panel} aria-label="Films">
-      <NameForm
-        label="Film title"
-        placeholder="The Long Winter"
-        submitLabel="Add film"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Film title" submitLabel="Add film" onSubmit={handleCreate} />
 
       {films && films.length > 0 ? (
         <ul className={styles.list}>

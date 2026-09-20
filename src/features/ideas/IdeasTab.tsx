@@ -27,12 +27,7 @@ export function IdeasTab() {
 
   return (
     <section className={styles.panel} aria-label="Ideas">
-      <NameForm
-        label="Idea"
-        placeholder="What if the bridge was never rebuilt?"
-        submitLabel="Add idea"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Idea — one sentence" submitLabel="Add idea" onSubmit={handleCreate} />
 
       {ideas && ideas.length > 0 ? (
         <ul className={styles.list}>

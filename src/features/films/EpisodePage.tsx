@@ -49,12 +49,7 @@ export function EpisodePage() {
         </h2>
       </div>
 
-      <NameForm
-        label="Scene title"
-        placeholder="The harbour at first light"
-        submitLabel="Add scene"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Scene title" submitLabel="Add scene" onSubmit={handleCreate} />
 
       {scenes && scenes.length > 0 ? (
         <ol className={styles.list}>

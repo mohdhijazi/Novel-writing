@@ -25,12 +25,7 @@ export function NovelsTab() {
 
   return (
     <section className={styles.panel} aria-label="Novels">
-      <NameForm
-        label="Novel title"
-        placeholder="The Glass Road"
-        submitLabel="Add novel"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Novel title" submitLabel="Add novel" onSubmit={handleCreate} />
 
       {novels && novels.length > 0 ? (
         <ul className={styles.list}>

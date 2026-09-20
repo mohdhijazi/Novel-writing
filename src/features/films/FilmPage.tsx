@@ -46,12 +46,7 @@ export function FilmPage() {
         <h2 className={styles.heading}>{film.title}</h2>
       </div>
 
-      <NameForm
-        label="Episode title"
-        placeholder="The first frost"
-        submitLabel="Add episode"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Episode title" submitLabel="Add episode" onSubmit={handleCreate} />
 
       {episodes && episodes.length > 0 ? (
         <ol className={styles.list}>

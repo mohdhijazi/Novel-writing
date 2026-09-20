@@ -26,12 +26,7 @@ export function RelationsTab() {
 
   return (
     <section className={styles.panel} aria-label="Relations">
-      <NameForm
-        label="Relation"
-        placeholder="The harbour families"
-        submitLabel="Add relation"
-        onSubmit={handleCreate}
-      />
+      <NameForm label="Relation" submitLabel="Add relation" onSubmit={handleCreate} />
 
       {relations && relations.length > 0 ? (
         <ul className={styles.list}>
